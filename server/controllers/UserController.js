@@ -1,12 +1,28 @@
 import AuthHelper from '../helper/AuthHelper'
 import jwt from 'jsonwebtoken'
 import expressJwt from 'express-jwt'
+import nodemailer from 'nodemailer'
 import config from '../../config/config'
 
 import fs from 'fs'
 import path from 'path'
 
 const photoDir = process.cwd() + '/images'
+
+let transporter = nodemailer.createTransport({
+    service: 'hotmail',
+    auth: {
+      user: 'adib.badjerei@outlook.com',
+      pass: 'Ingat219'
+    }
+})
+
+let mailOptions = {
+    from: 'adib.badjerei@outlook.com',
+    to: ``,
+    subject: 'Registration successful.',
+    text: 'Thank you for join us. If this is not you, don\'t hesitate to contact us.'
+}
 
 const findAllUsers = async (req, res) => {
     try {
@@ -101,7 +117,7 @@ const signUp = async (req, res) => {
             if (!user_birthdate.match(dateFormat)) return res.status(400).send({ message: 'Birthdate format should be yyyy/mm/dd , yyyy-mm-dd or yyyy.mm.dd' })
         }
 
-        const user_type = user_name.split(' ')[0].toLowerCase() === 'admin' ? 'Admin' : 'User'
+        const user_type = user_email.split('@')[1].toLowerCase() === 'admin.rentcar.id' ? 'Admin' : 'User'
 
         const salt = AuthHelper.makeSalt()
         const hashPassword = AuthHelper.hashPassword(user_password, salt)
@@ -118,16 +134,20 @@ const signUp = async (req, res) => {
             }
         )
         if (!user.user_id) return res.status(500).send({ message: 'Failed to signUp.' })
-        return res.status(201).send(
-            {
-                user_name: user.user_name,
-                user_email: user.user_email,
-                user_birthdate: user.user_birthdate,
-                user_gender: user.user_gender,
-                user_avatar: user.user_avatar,
-                user_type: user.user_type,
-            }
-        )
+        mailOptions = {...mailOptions, to: user.user_email}
+        transporter.sendMail(mailOptions, function(error, info){
+            if (error) return res.status(500).send({message: `Send mail ${error}.`})
+            return res.status(201).send(
+                {
+                    user_name: user.user_name,
+                    user_email: user.user_email,
+                    user_birthdate: user.user_birthdate,
+                    user_gender: user.user_gender,
+                    user_avatar: user.user_avatar,
+                    user_type: user.user_type,
+                }
+            )
+        })
     } catch (error) {
         return res.status(500).send({ message: `Sign up ${error}.` })
     }
@@ -330,7 +350,7 @@ const requireLogin = expressJwt({
 
 const isAuthorized = (req, res, next) => {
     try {
-        const authorized = req.user && req.auth && req.user.id == req.auth.id
+        const authorized = req.user && req.auth && req.user._id == req.auth._id
         if (!(authorized)) return res.status(403).send({ message: 'User not authorized.' })
         next()
     } catch (error) {

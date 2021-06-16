@@ -8,9 +8,9 @@ router.post('/:folder/:id', IndexController.CarController.findOneCarNum, IndexCo
     IndexController.CarImageController.createCarImage, IndexController.CarController.findOneCar)
 router.put('/:folder/:number', IndexController.CarController.findOneCarNum, IndexController.UploadController.fileUpload,
     IndexController.CarImageController.updateCarImage)
-router.delete('/:id', IndexController.CarImageController.deleteCarImage)
+router.delete('/:id/:imid', IndexController.CarImageController.deleteCarImage)
 
 //* Download image
-router.get('/:folder/download', IndexController.DownloadController.download)
+router.get('/:folder/:subfol/:filename', IndexController.DownloadController.download)
 
 export default router

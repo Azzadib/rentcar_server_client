@@ -16,6 +16,28 @@ const findCartByUser = async (req, res) => {
     }
 }
 
+const findOpenCartByUser = async (req, res) => {
+    try {
+        const user = req.existsuser
+        if (!user) return res.status(404).send({ message: 'Customer not found.' })
+
+        const cart = await req.context.models.CarCart.findOne(
+            {
+                where: { 
+                    cart_status: 'open',
+                    cart_user_id: user.user_id
+                },
+                include: [
+                    {model: req.context.models.LineItem }
+                ]
+            }
+        )
+        return res.status(200).send(cart)
+    } catch (error) {
+        return res.status(500).send({ message: `Find open cart by user ${error}.` })
+    }
+}
+
 const existsCartID = async (req, res, next) => {
     try {
         if (req.params.id === undefined || isNaN(req.params.id)) return res.status(400).send({ message: 'ID of searched cart is null or has wrong type.' })
@@ -73,7 +95,7 @@ const createCart = async (req, res, next) => {
 const cartSummary = async (req, res, next) => {
     try {
         const cart = req.existscartid
-        if (!cart) return res.status(404).send({ message: 'Can\'t show data of unknown cart.' })
+        if (!cart) return res.status(404).send({ message: 'Can\'t find data of unknown cart.' })
 
         const { order_city } = req.body
 
@@ -110,6 +132,7 @@ const closeCart = async (req, res, next) => {
 
 export default {
     findCartByUser,
+    findOpenCartByUser,
     existsCartUser,
     existsCartID,
     createCart,

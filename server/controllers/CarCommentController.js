@@ -1,3 +1,5 @@
+import { sequelize } from '../../config/config-db'
+
 const findAllComment = async (req, res) => {
     try {
         const comments = await req.context.models.CarComment.findAll()
@@ -65,7 +67,7 @@ const existsComment = async (req, res, next) => {
     }
 }
 
-const createComment = async (req, res) => {
+const createComment = async (req, res, next) => {
     try {
         const user = req.existsuser
         if (!user) return res.status(400).send({ message: 'User data not found.' })
@@ -87,7 +89,8 @@ const createComment = async (req, res) => {
             }
         )
         if (!comment) return res.status(500).send({ message: 'Failed to create comment.' })
-        return res.status(201).send(comment)
+        req.comment = comment
+        next()
     } catch (error) {
         return res.status(500).send({ message: `Create comment ${error}.` })
     }
@@ -122,6 +125,27 @@ const editComment = async (req, res) => {
     }
 }
 
+const carRatings = async (req, res, next) => {
+    try {
+        const car = req.existsnumber
+        const rating = await sequelize.query(
+            'SELECT ((SUM(carco_rating))::FLOAT/COUNT(carco_id)) AS car_rating, COUNT(carco_id) AS reviews, SUM(carco_rating) AS total_star FROM car_comments WHERE carco_car_id = :carId',
+            {
+                replacements: { carId: parseInt(car.car_id) },
+                type: sequelize.QueryTypes.SELECT
+            }
+        )
+        if (!rating) return res.status(500).send({message: 'Failed to count rating.'})
+        req.existscar = car
+        req.rating = rating[0]
+        const { car_rating } = rating[0]
+        next()
+    } catch (error) {
+        return res.status(500).send({ message: `Car rating ${error}.` })
+    }
+}
+
+
 const deleteComment = async (req, res) => {
     try {
         const toDeleteComment = req.existscomment
@@ -148,5 +172,6 @@ export default {
     existsComment,
     createComment,
     editComment,
+    carRatings,
     deleteComment,
 }

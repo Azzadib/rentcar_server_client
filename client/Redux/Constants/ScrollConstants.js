@@ -1,0 +1,2 @@
+export const PAGE_ON_TOP = 'PAGE_SCROLLING'
+export const PAGE_NOT_ON_TOP = 'PAGE_NOT_SCROLLING'

@@ -4,6 +4,7 @@ import IndexController from '../controllers/IndexController'
 const router = Router()
 
 router.get('/allcar', IndexController.CarController.findAllCar)
+router.get('/type/:type', IndexController.CarController.findAllCarType)
 router.get('/:id', IndexController.CarController.findOneCar)
 router.get('/num/:number', IndexController.CarController.findOneCarNum)
 router.post('/:folder/:number', IndexController.CarController.findOneCarNum, IndexController.UploadController.fileUpload,

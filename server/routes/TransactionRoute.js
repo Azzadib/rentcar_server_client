@@ -20,6 +20,8 @@ router.delete('/itemdelete/:id', IndexController.LineItemController.existsLiteID
 
 //* Handle cart
 router.get('/cartbyuser/:id', IndexController.UserController.existsUser, IndexController.CarCartController.findCartByUser)
+router.get('/opencart/:id', IndexController.UserController.existsUser, IndexController.CarCartController.findOpenCartByUser)
+
 router.get('/sum/:id', IndexController.CarCartController.existsCartID, IndexController.CarCartController.cartSummary)
 
 //* Proceed to checkout

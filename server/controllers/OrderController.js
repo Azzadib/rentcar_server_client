@@ -5,7 +5,7 @@ const createOrder = async (req, res, next) => {
 
         const summary = req.summary
         if (!summary) return res.status(404).send({ message: 'Order summary not found.' })
-        if (summary.lite_status !== 'checkout') return res.status(400).send({ message: 'All car need to proceed to checkout to be ordered.' })
+        if (summary.lite_status !== 'cart') return res.status(400).send({ message: 'All car should be in cart to be ordered.' })
 
         const cart = req.existscartid
 
@@ -15,8 +15,6 @@ const createOrder = async (req, res, next) => {
         const order_tax = parseInt(0.1 * beforeTax)
         const afterTax = parseInt(beforeTax + order_tax)
         const { order_city, order_address } = req.body
-
-        console.log(`dis: ${total_discount}, tax: ${order_tax}, due: ${afterTax}, days: ${total_days}.`)
 
         const order = await req.context.models.Order.create(
             {

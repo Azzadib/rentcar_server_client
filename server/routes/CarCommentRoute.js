@@ -8,7 +8,7 @@ router.get('/id/:id', IndexController.CarCommentController.findCommentByID)
 router.get('/user/:id', IndexController.UserController.existsUser, IndexController.CarCommentController.findCommentByUser)
 router.get('/car/:id', IndexController.CarController.findOneCarID, IndexController.CarCommentController.findCommentByCar)
 router.post('/:id/:number', IndexController.UserController.existsUser, IndexController.CarController.findOneCarNum,
-    IndexController.CarCommentController.createComment)
+    IndexController.CarCommentController.createComment, IndexController.CarCommentController.carRatings, IndexController.CarController.updateCar)
 router.put('/:id/', IndexController.CarCommentController.existsComment, IndexController.CarCommentController.editComment)
 router.delete('/:id', IndexController.CarCommentController.existsComment, IndexController.CarCommentController.deleteComment)
 

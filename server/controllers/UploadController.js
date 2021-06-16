@@ -18,7 +18,7 @@ const fileUpload = async (req, res, next) => {
         const images = []
 
         let dataUploaded = {
-            images
+            images,
         }
 
         const form = formidable({ multiples: true, uploadDir: photoDir, keepExtensions: true })

@@ -5,15 +5,15 @@ const photoDir = process.cwd() + '/images'
 
 const listPassenger = [2, 3, 5, 8, 10]
 const listDoor = [2, 4, 5]
-const listType = ['Sedan', 'SUV', 'Truck']
-const listStatus = ['Open', 'Leased']
+const listType = ['sedan', 'suv', 'truck']
 
 const findAllCar = async (req, res) => {
     try {
         const cars = await req.context.models.Car.findAll(
             {
                 include: [
-                    { model: req.context.models.CarImage }
+                    { model: req.context.models.CarImage },
+                    { model: req.context.models.CarComment },
                 ],
                 order: [
                     ['car_manufacturer', 'ASC'],
@@ -25,6 +25,29 @@ const findAllCar = async (req, res) => {
         return res.status(200).send(cars)
     } catch (error) {
         return res.status(500).send({ message: `Find all car ${error}.` })
+    }
+}
+
+const findAllCarType = async (req, res) => {
+    try {
+        if (listType.indexOf(req.params.type) === -1) return res.status(404).send({message: 'Car with searched type not found.'})
+        const cars = await req.context.models.Car.findAll(
+            {
+                include: [
+                    { model: req.context.models.CarImage },
+                    { model: req.context.models.CarComment },
+                ],
+                order: [
+                    ['car_manufacturer', 'ASC'],
+                    ['car_model', 'ASC'],
+                    ['car_number', 'ASC'],
+                ],
+                where: { car_type: req.params.type }
+            }
+        )
+        return res.status(200).send(cars)
+    } catch (error) {
+        return res.status(500).send({ message: `Find all car type ${error}.` })
     }
 }
 
@@ -119,7 +142,7 @@ const createCar = async (req, res, next) => {
         if (car_ac !== 0 && car_ac !== 1) return res.status(400).send({ message: `Ac should be 0 or 1. Found: ${car_ac}.` })
 
         if (!car_type) return res.status(400).send({ message: 'Type can\'t be null.' })
-        if (listType.indexOf(car_type) === -1) return res.status(400).send({ message: `Type only accept Sedan, SUV or Truck as value. Found: ${car_type}.` })
+        if (listType.indexOf(car_type.toLowerCase()) === -1) return res.status(400).send({ message: `Type only accept Sedan, SUV or Truck as value. Found: ${car_type}.` })
 
         const car = await req.context.models.Car.create(
             {
@@ -131,7 +154,7 @@ const createCar = async (req, res, next) => {
                 car_baggage: car_baggage,
                 car_door: car_door,
                 car_ac: car_ac,
-                car_type: car_type,
+                car_type: car_type.toLowerCase(),
                 car_description: car_description,
                 car_user_id: car_user_id
             }
@@ -151,7 +174,6 @@ const updateCar = async (req, res) => {
         const oldCar = req.existscar
         if (!oldCar) return res.status(404).send({ message: 'Car to be updated not found.' })
 
-        if (isNaN(req.params.id) || req.params.id < 0) return res.status(400).send({ message: 'ID of the car to be updated is null or has wrong type.' })
         let { car_manufacturer, car_model, car_price, car_passenger, car_baggage, car_door, car_ac, car_type, car_description, car_user_id } = req.body
 
         if (!car_manufacturer) car_manufacturer = oldCar.car_manufacturer
@@ -173,9 +195,13 @@ const updateCar = async (req, res) => {
         else if (car_ac !== 0 && car_ac !== 1) return res.status(400).send({ message: `Ac should be 0 or 1. Found: ${car_ac}.` })
 
         if (car_type === undefined) car_type = oldCar.car_type
-        if (listType.indexOf(car_type) === -1) return res.status(400).send({ message: `Type only accept Sedan, SUV or Truck as value. Found: ${car_type}.` })
+        if (listType.indexOf(car_type.toLowerCase()) === -1) return res.status(400).send({ message: `Type only accept Sedan, SUV or Truck as value. Found: ${car_type}.` })
 
         if (car_description === undefined) car_description = oldCar.car_description
+
+        let car_rating = undefined
+        const rating = req.rating
+        rating? car_rating = rating.car_rating.toFixed(1) : oldCar.car_rating
 
         const newCar = await req.context.models.Car.update(
             {
@@ -186,8 +212,9 @@ const updateCar = async (req, res) => {
                 car_baggage: car_baggage,
                 car_door: car_door,
                 car_ac: car_ac,
-                car_type: car_type,
+                car_type: car_type.toLowerCase(),
                 car_description: car_description,
+                car_rating: car_rating,
                 car_user_id: car_user_id
             },
             {
@@ -195,9 +222,10 @@ const updateCar = async (req, res) => {
             }
         )
         if (!newCar[0]) return res.status(500).send({ message: 'Failed to update car.' })
+        if (req.comment) return res.status(201).send(req.comment)
         return res.status(201).send(newCar[1][0])
     } catch (error) {
-        return res.status(500).send({ message: `Update car ${error}.` })
+        return res.status(500).send({ message: `Update car ${error}. car_rating: ${car_rating}` })
     }
 }
 
@@ -282,6 +310,7 @@ const deleteCar = async (req, res) => {
 
 export default {
     findAllCar,
+    findAllCarType,
     findOneCar,
     findOneCarID,
     findOneCarNum,

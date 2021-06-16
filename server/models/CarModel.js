@@ -48,6 +48,11 @@ const car = (sequelize, DataTypes) => {
       type: DataTypes.STRING(500),
       allowNull: true
     },
+    car_rating: {
+      type: DataTypes.DECIMAL,
+      allowNull: true,
+      defaultValue: 0
+    },
     car_user_id: {
       type: DataTypes.INTEGER,
       allowNull: true,

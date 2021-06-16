@@ -4,6 +4,8 @@ import cokieParser from 'cookie-parser'
 import compress from 'compression'
 import cors from 'cors'
 import helmet from 'helmet'
+import { Provider } from 'react-redux'
+import store from '../client/Redux/Store'
 
 import models from './models/IndexModel'
 import routes from './routes/IndexRoute'
@@ -50,9 +52,11 @@ app.use('/api/user', routes.UserRoute)
 app.get('/*', (req, res) => {
     const context = {}
     const markup = ReactDOMServer.renderToString(
-        <StaticRouter location={req.url} context={context}>
-            <MainRouter/>
-        </StaticRouter>
+        <Provider store={store}>
+            <StaticRouter location={req.url} context={context}>
+                <MainRouter/>
+            </StaticRouter>
+        </Provider>
     )
 
     if (context.url) {

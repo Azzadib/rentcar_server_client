@@ -113,8 +113,7 @@ const deleteCarImage = async (req, res) => {
         const exists = await req.context.models.CarImage.findOne(
             {
                 where: {
-                    caim_car_id: req.params.id,
-                    caim_filename: req.body.filename
+                    caim_id: req.params.imid
                 }
             }
         )
@@ -123,8 +122,7 @@ const deleteCarImage = async (req, res) => {
         await req.context.models.CarImage.destroy(
             {
                 where: {
-                    caim_car_id: req.params.id,
-                    caim_filename: req.body.filename
+                    caim_id: req.params.imid
                 }
             }
         ).then(count => {
@@ -133,7 +131,7 @@ const deleteCarImage = async (req, res) => {
             return res.status(200).send({ message: 'Image deleted.' })
         })
     } catch (error) {
-        return res.status(500).send({ message: `Delete car ${error}.` })
+        return res.status(500).send({ message: `Delete car image ${error}.` })
     }
 }
 
