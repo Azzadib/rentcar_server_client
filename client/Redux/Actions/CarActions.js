@@ -14,12 +14,12 @@ import {
     EDIT_CAR_SUCCESS,
 } from '../Constants/CarConstants'
 
-export const carByTypeActions = (carType) => async (dispatch) => {
+export const carByTypeActions = (carType, query) => async (dispatch) => {
     dispatch({
         type: CAR_BYTYPE_REQUEST,
     })
     try {
-        const data = await axios.get(`/api/car/type/${carType}`)
+        const data = await axios.get(`/api/car/type/${carType}?${query}`)
         dispatch({ type: CAR_BYTYPE_SUCCESS, payload: data })
     } catch (error) {
         dispatch({ type: CAR_BYTYPE_FAIL, payload: error.response })
@@ -53,6 +53,7 @@ export const createCarActions = (number, cardata) => async (dispatch) => {
 }
 
 export const editCarActions = (carid, cardata) => async (dispatch) => {
+
     dispatch({
         type: EDIT_CAR_REQUEST
     })

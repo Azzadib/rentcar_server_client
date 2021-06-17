@@ -1,7 +1,11 @@
 import fs from 'fs'
 import path from 'path'
+//import { sequelize } from '../../config/config-db'
+import Sequelize from 'sequelize'
 
 const photoDir = process.cwd() + '/images'
+
+const Op = Sequelize.Op
 
 const listPassenger = [2, 3, 5, 8, 10]
 const listDoor = [2, 4, 5]
@@ -31,21 +35,41 @@ const findAllCar = async (req, res) => {
 const findAllCarType = async (req, res) => {
     try {
         if (listType.indexOf(req.params.type) === -1) return res.status(404).send({message: 'Car with searched type not found.'})
-        const cars = await req.context.models.Car.findAll(
+        const { limit, page, manufac, pssngr, order, sort, maxprice, minprice, search } = req.query
+        let condition = { car_type: req.params.type }
+
+        if (search) condition = { ...condition, [Op.or]: [{ car_manufacturer: { [Op.iLike]: `%${search}%` }}, { car_model: { [Op.iLike]: `%${search}%` }}]}
+        if (maxprice || minprice) {
+            if (maxprice && minprice)  condition = { ...condition, car_price: { [Op.lte]: maxprice, [Op.gte]: minprice } }
+            else if (maxprice && !minprice)  condition = { ...condition, car_price: { [Op.lte]: maxprice } }
+            else if (minprice && !maxprice)  condition = { ...condition, car_price: { [Op.gte]: minprice } }
+        } 
+
+        if (manufac) condition = { ...condition, car_manufacturer: { [Op.iLike]: manufac }}
+        if (pssngr) condition = { ...condition, car_passenger: pssngr }
+        const carlimit = limit? limit : 8
+        const carpage = page? page : 1
+        const carorder = order? order : 'car_number'
+        const carsort = sort? sort : 'ASC'
+        const offset = carlimit * (carpage-1)
+        
+        const cars = await req.context.models.Car.findAndCountAll(
             {
                 include: [
                     { model: req.context.models.CarImage },
                     { model: req.context.models.CarComment },
                 ],
                 order: [
-                    ['car_manufacturer', 'ASC'],
-                    ['car_model', 'ASC'],
-                    ['car_number', 'ASC'],
+                    [carorder, carsort],
+                    
                 ],
-                where: { car_type: req.params.type }
+                where: condition,
+                limit: carlimit,
+                offset: offset
             }
         )
-        return res.status(200).send(cars)
+        const pages = Math.ceil(cars.count / carlimit)
+        return res.status(200).send({ pages: pages, page: carpage, count: cars.count, rows: cars.rows })
     } catch (error) {
         return res.status(500).send({ message: `Find all car type ${error}.` })
     }

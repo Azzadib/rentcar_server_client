@@ -11,6 +11,8 @@ import { addLiteActions } from '../../Redux/Actions/LiteActions'
 import { cartListActions } from '../../Redux/Actions/CartActions'
 import { Link } from 'react-router-dom'
 import noImg from '../../assets/images/no-image.jpg'
+import DatePicker from 'react-datepicker'
+import { addDays, addMonths } from 'date-fns'
 
 export default function CarDetail() {
   const { id } = useParams()
@@ -23,6 +25,9 @@ export default function CarDetail() {
   const [userdetail, setUserdetail] = useState()
   const [isAdmin, setIsAdmin] = useState(false)
   const [days, setDays] = useState(1)
+
+  const [startDate, setStartDate] = useState(new Date());
+  const [endDate, setEndDate] = useState()
 
   const dispatch = useDispatch()
   useEffect(() => {
@@ -131,15 +136,23 @@ export default function CarDetail() {
     </div>
   )
 
+  const checkDate = () => {
+    const oneDay = 24 * 60 * 60 * 1000
+    const days = Math.round(Math.abs((startDate - endDate) / oneDay)) + 1
+    console.log('start:', startDate)
+    console.log('end:', endDate)
+    console.log('days:', days)
+  }
+
   return (
     <div className="bg-gray-200">
       <div className="relative min-h-screen px-2 py-16 mx-auto sm:max-w-xl md:max-w-full lg:max-w-screen-xl md:px-24 lg:px-4 lg:py-20">
         <div className="container mx-auto py-10 flex flex-wrap gap-5">
           <div className="flex flex-wrap z-40 w-screen">
             <div className="fixed">
-              <img src={ mainimages.img? mainimages.img : images[0]? images[0].img : noImg }
+              <img src={mainimages.img ? mainimages.img : images[0] ? images[0].img : noImg}
                 className="mb-3 w-96 h-50v border-red-500 border-2 object-cover overflow-hidden"
-                onError={(e) => { e.target.onerror = null; e.target.src ={noImg} }}
+                onError={(e) => { e.target.onerror = null; e.target.src = { noImg } }}
               />
               <div className="flex flex-wrap">
                 {
@@ -148,7 +161,7 @@ export default function CarDetail() {
                       <img src={image.img} key={index}
                         onClick={() => setMainimages({ img: image.img })}
                         className="w-20 h-10v mr-5 mb-2 border-red-500 border-2 overflow-hidden object-cover"
-                        onError={(e) => { e.target.onerror = null; e.target.src = {noImg} }}
+                        onError={(e) => { e.target.onerror = null; e.target.src = { noImg } }}
                       />
                     ))
                     :
@@ -164,12 +177,31 @@ export default function CarDetail() {
                 </div>
                 <Link to={{ pathname: `/admin/editcar/${id}`, }}>
                   <button
-                    className={isAdmin? "ml-8 border border-red-500 bg-white rounded-xl font-bold text-red-500 px-2 focus:outline-none active:transform active:scale-125" : 'hidden'}
+                    className={isAdmin ? "ml-8 border border-red-500 bg-white rounded-xl font-bold text-red-500 px-2 focus:outline-none active:transform active:scale-125" : 'hidden'}
                   >
                     Edit car
                   </button>
                 </Link>
               </div>
+              {/* <DatePicker
+                className="h-5v w-28 bg-red-200"
+                selected={startDate}
+                onChange={(date) => setStartDate(date)}
+                minDate={new Date()}
+                maxDate={addMonths(new Date(), 1)}
+                showDisabledMonthNavigation
+              />
+              <DatePicker
+                className="h-5v w-28 bg-red-200 ml-5"
+                selected={endDate}
+                onChange={(date) => setEndDate(date)}
+                minDate={startDate}
+                maxDate={addDays(startDate, 14)}
+                showDisabledMonthNavigation
+              />
+              <button className="ml-5" onClick={checkDate} >check</button>
+              <div className="mx-3">{startDate? startDate.toString() : ''}</div>
+              <div>{endDate? endDate.toString() : ''}</div> */}
               <div className="flex mb-3">
                 <div>{loading ? 0 : car.car_comments.length}</div>
                 <div className="ml-2 mr-4">reviews</div>
