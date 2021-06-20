@@ -46,6 +46,7 @@ export default function Cars() {
   const manufacturerLists = [
     { item: 'BMW' },
     { item: 'Toyota' },
+    { item: 'Chevrolet' },
     { item: 'Mitsubishi' },
     { item: 'Daihatsu' },
     { item: 'Hummer' },
@@ -70,16 +71,27 @@ export default function Cars() {
   ]
   const [shows, setShows] = useState({ item: 'Select' })
 
+  const sortByLists = [
+    { item: 'Price' },
+    { item: 'Rating' }
+  ]
+  const [sortby, setSortby] = useState({ item: 'Select' })
+  
   const sortLists = [
     { item: 'ASC' },
     { item: 'DESC' }
   ]
-  const [sort, setSort] = useState({ item: 'Select' })
-  const [minprice, setMinprice] = useState(0)
-  const [maxprice, setMaxprice] = useState(0)
+  const [sort, setSort] = useState(sortLists[0])
 
-  const handleOnChangePrice = field => event => {
-    field === 'min'? setMinprice(event.target.value) : setMaxprice(event.target.value)
+  const [minprice, setMinprice] = useState()
+  const [maxprice, setMaxprice] = useState()
+
+  const ChangeMin = event => {
+    if (!isNaN(event.target.value)) setMinprice(event.target.value)
+  }
+
+  const ChangeMax = event => {
+    if (!isNaN(event.target.value)) setMaxprice(event.target.value)
   }
 
   const applyQuery = () => {
@@ -88,21 +100,40 @@ export default function Cars() {
     if (passenger.item !== 'Select') tempQuery += `&pssngr=${passenger.item}`
     if (shows.item !== 'Select') tempQuery += `&limit=${shows.item}`
     if (minprice) tempQuery += `&minprice=${minprice}`
-    if (maxprice) tempQuery += `&minprice=${maxprice}`
+    if (maxprice) tempQuery += `&maxprice=${maxprice}`
     if (sort.item !== 'Select') tempQuery += `&sort=${sort.item}`
+    if (sortby.item !== 'Select') tempQuery += `&order=car_${sortby.item.toLocaleLowerCase()}`
     if (tempQuery) setQuery(tempQuery)
   }
 
   const clearQuery = () => {
-    setManufacturer({ item: 'Select'})
-    setPassenger({ item: 'Select'})
-    setShows({ item: 'Select'})
+    setManufacturer({ item: 'Select' })
+    setPassenger({ item: 'Select' })
+    setShows({ item: 'Select' })
+    setMinprice()
+    setMaxprice()
+    setSort(sortLists[0])
+    setSortby({ item: 'Select'})
     if (query) setQuery()
+  }
+
+  const movePage = (slctPage) => {
+    let tempQuery = ''
+    if (manufacturer.item !== 'Select') tempQuery += `&manufac=${manufacturer.item}`
+    if (passenger.item !== 'Select') tempQuery += `&pssngr=${passenger.item}`
+    if (shows.item !== 'Select') tempQuery += `&limit=${shows.item}`
+    if (minprice) tempQuery += `&minprice=${minprice}`
+    if (maxprice) tempQuery += `&maxprice=${maxprice}`
+    if (sort.item !== 'Select') tempQuery += `&sort=${sort.item}`
+    if (sortby.item !== 'Select') tempQuery += `&order=car_${sortby.item.toLocaleLowerCase()}`
+    tempQuery += `&page=${slctPage}`
+    console.log('query:', tempQuery)
+    setQuery(tempQuery)
   }
 
   const selectorWidget = (type, setted) => (
     <div className="">
-      <Listbox value={type} onChange={type === manufacturerLists ? setManufacturer : type === passengerLists ? setPassenger : type === showsLists? setShows : setSort}>
+      <Listbox value={type} onChange={type === manufacturerLists ? setManufacturer : type === passengerLists ? setPassenger : type === sortByLists? setSortby : type === sortLists? setSort : type === showsLists ? setShows : setSort}>
         {({ open }) => (
           <>
             <div className="relative">
@@ -201,23 +232,37 @@ export default function Cars() {
             />
           </svg>
         </div>
-        <div className="mt-10 flex">
-          <div className="z-10">Manufacturer:</div>
-          <div className="ml-3 h-5v z-50 w-28">{selectorWidget(manufacturerLists, manufacturer)}</div>
-          <div className="ml-5 z-10">Passenger:</div>
-          <div className="ml-3 h-5v z-50 w-20">{selectorWidget(passengerLists, passenger)}</div>
-          <div className="ml-5 z-10">Shows:</div>
-          <div className="ml-3 h-5v z-50 w-20">{selectorWidget(showsLists, shows)}</div>
-          <div className="ml-5 z-10">Price:</div>
-          <button className="ml-5 z-10 bg-white py-1 px-2 h-7v -mt-2 text-red-700 rounded-xl border-2 font-semibold border-red-700 focus:outline-none" onClick={applyQuery}>Apply</button>
-          <button className="ml-5 z-10 bg-red-700 py-1 px-2 h-7v -mt-2 text-white rounded-xl font-semibold focus:outline-none" onClick={clearQuery}>Clear filter</button>
-        </div>
+        {
+          loading ?
+            ''
+            :
+            cars.rows.length > 0 ?
+              <div className="mt-10 flex">
+                <div className="z-10">Manufacturer:</div>
+                <div className="ml-1 h-5v z-20 w-28">{selectorWidget(manufacturerLists, manufacturer)}</div>
+                <div className="ml-3 z-20">Passenger:</div>
+                <div className="ml-1 h-5v z-20 w-20">{selectorWidget(passengerLists, passenger)}</div>
+                <div className="ml-3 z-20">Shows:</div>
+                <div className="ml-1 h-5v z-20 w-20">{selectorWidget(showsLists, shows)}</div>
+                <div className="ml-3 z-20">Price:</div>
+                <input type="text" className="ml-1 -mt-1 z-20 w-24 h-5v focus:ring-0" placeholder="Minimum" value={minprice} onChange={ChangeMin}/>
+                <input type="text" className="ml-1 -mt-1 z-20 w-24 h-5v focus:ring-0" placeholder="Maximum" value={maxprice} onChange={ChangeMax}/>
+                <div className="ml-3 z-20">Sort by:</div>
+                <div className="ml-1 h-5v z-20 w-20">{selectorWidget(sortByLists, sortby)}</div>
+                <div className="ml-1 h-5v z-20 w-20">{selectorWidget(sortLists, sort)}</div>
+                <button className="ml-5 z-20 bg-white py-1 px-2 h-7v -mt-2 text-red-700 rounded-xl border-2 font-semibold border-red-700 focus:outline-none" onClick={applyQuery}>Apply</button>
+                <button className="ml-5 z-20 bg-red-700 py-1 px-2 h-7v -mt-2 text-white rounded-xl font-semibold focus:outline-none" onClick={clearQuery}>Clear filter</button>
+              </div>
+              :
+              ''
+        }
+        {loading? '' : cars.rows.length > 0 ? <div className="text-blue-700">Page {cars.page} of {cars.pages}</div> : ''}
         <div className="container mx-auto bg-gray-100 mt-5 flex flex-wrap justify-center gap-5">
           {
             error ?
               <div className="z-40">
-                <img src={searcherror} className="w-80" onLoad={() => setShowsorry(true)}/>
-                <div className={showsorry? "text-center text-lg text-gray-500 font-bold" : "hidden"}>{error && error.data.message}</div>
+                <img src={searcherror} className="w-80" onLoad={() => setShowsorry(true)} />
+                <div className={showsorry ? "text-center text-lg text-gray-500 font-bold" : "hidden"}>{error && error.data.message}</div>
               </div>
               :
               loading ?
@@ -238,10 +283,60 @@ export default function Cars() {
                   :
                   <div className="z-40">
                     <img src={search1} className="max-w-sm" onLoad={() => setShowsorry(true)} />
-                    <div className={showsorry? "text-center max-w-md text-gray-600" : "hidden"}>Sorry. It looks like we have no available car with this type. Contact us for more information.</div>
+                    <div className={showsorry ? "text-center max-w-md text-gray-600" : "hidden"}>Sorry. It looks like we have no available car with this type. Contact us for more information.</div>
                   </div>
           }
         </div>
+        {
+          loading ?
+            ''
+            :
+            cars.rows.length > 0 ?
+              <div class="flex justify-center mt-10 space-x-1">
+                <button onClick={()=> {cars.page > 1? movePage(cars.page - 1) : null }}
+                  class={`${cars.page > 1? 'text-indigo-600 hover:bg-blue-200' : 'text-gray-400'} flex items-center justify-center h-8 w-8 rounded focus:outline-none z-20`}
+                >
+                  <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" disabled={cars.page === 1}>
+                    <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
+                  </svg>
+                </button>
+                <button onClick={()=> {cars.page > 1? movePage(cars.page - 1) : null }}
+                  class={`${cars.page > 1? 'text-indigo-600 hover:bg-blue-200' : 'text-gray-400'} flex items-center justify-center h-8 px-2 rounded text-sm font-medium focus:outline-none z-20`} disabled={cars.page === 1}
+                >
+                  Prev
+                </button>
+                {
+
+                  runCallback(() => {
+                    const row = []
+                    for (let i = 0; i < cars.pages; i++) {
+                      row.push(
+                        <button onClick={()=> movePage(i + 1)}
+                          class={`${cars.page == (i+1)? 'bg-blue-200' : ''} flex items-center justify-center h-8 w-8 rounded text-sm font-medium text-indigo-600 hover:bg-blue-200 focus:outline-none z-20`}
+                        >
+                          {i + 1}
+                        </button>
+                      )
+                    }
+                    return row
+                  })
+                }
+                <button onClick={()=> {cars.page < cars.pages? movePage(parseInt(cars.page) + 1) : null }}
+                  class={`${cars.page < cars.pages? 'text-indigo-600 hover:bg-blue-200' : 'text-gray-400'} flex items-center justify-center h-8 px-2 rounded text-sm font-medium focus:outline-none z-20`}
+                >
+                  Next
+                </button>
+                <button onClick={()=> {cars.page < cars.pages? movePage(parseInt(cars.page) + 1) : null }}
+                  class={`${cars.page < cars.pages? 'text-indigo-600 hover:bg-blue-200' : 'text-gray-400'} flex items-center justify-center h-8 w-8 rounded focus:outline-none z-20`}
+                >
+                  <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                  </svg>
+                </button>
+              </div>
+              :
+              ''
+        }
       </div>
     </div>
   )

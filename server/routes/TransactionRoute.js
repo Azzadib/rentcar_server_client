@@ -7,6 +7,7 @@ const router = Router()
 router.get('/bycart/:id', IndexController.CarCartController.existsCartID, IndexController.LineItemController.findLitebByCart)
 router.get('/bycar/:id', IndexController.CarController.findOneCarID, IndexController.LineItemController.findLitebByCar)
 router.get('/bynum/:number', IndexController.CarController.findOneCarNum, IndexController.LineItemController.findLitebByCarNum)
+router.get('/byorder/:name', IndexController.LineItemController.findLitebByOrder)
 
 router.post('/tocart/:id/:number',
     IndexController.UserController.existsUser, IndexController.CarCartController.existsCartUser, IndexController.CarCartController.createCart,
@@ -33,10 +34,15 @@ router.post('/order/:id', IndexController.CarCartController.existsCartID, IndexC
     IndexController.LineItemController.findLitebByCart, IndexController.CarController.carAvailable, IndexController.OrderController.createOrder, 
     IndexController.LineItemController.processLite, IndexController.CarCartController.closeCart, IndexController.CarController.rentCar)
 
+//* Get orders
+router.get('/myorders/:id', IndexController.OrderController.getOrderByUser)
+router.get('/order/:name', IndexController.OrderController.getOrderByName)
+
+//* Update order
+router.put('/order/:status/:name',
+    IndexController.OrderController.findOrderByName, IndexController.LineItemController.litebByOrder, IndexController.OrderController.updateOrder,
+    IndexController.CarController.resetCar)
+
 //* Cancel, rent, or close order
-
-router.get('/test', IndexController.OrderController.createOrder)
-router.get('/try', IndexController.OrderController.getAllOrder)
-
 
 export default router

@@ -43,7 +43,7 @@ export default function Carcards(props) {
   }
 
   return (
-    <div className="bg-white rounded-t-lg w-72 z-40 shadow-lg cursor-pointer rounded transform hover:transform hover:scale-105 hover:border-2 duration-300 ease-in-out hover:border-red-500">
+    <div className="bg-white rounded-t-lg w-72 z-10 shadow-lg cursor-pointer rounded transform hover:transform hover:scale-105 hover:border-2 duration-300 ease-in-out hover:border-red-500">
       <div onClick={() => window.location=`/detail/${car.car_id}`}>
         <div className={`${car.car_rating >= 4 ? '' : 'hidden'} absolute mx-2 bg-yellow-400 rounded-3xl px-2 mt-2 text-white`}>
           Recommended

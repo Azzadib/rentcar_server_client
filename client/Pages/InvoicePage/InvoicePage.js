@@ -1,6 +1,6 @@
 import React from 'react'
 import NavBar from '../../Components/NavBar'
-import OrderResult from './OrderResult'
+import Invoice from './Invoice'
 
 export default function InvoicePage() {
     return (
@@ -9,7 +9,7 @@ export default function InvoicePage() {
                 <NavBar/>
             </header>
             <main>
-                <OrderResult/>
+                <Invoice/>
             </main>
         </>
     )

@@ -15,6 +15,6 @@ router.delete('/:avatar/:id', IndexController.UserController.existsUser, IndexCo
 router.get('/signout', IndexController.UserController.signOut)
 
 //* Download avatar
-router.get('/:folder/download', IndexController.DownloadController.download)
+router.get('/:folder/:subfol/:filename', IndexController.DownloadController.download)
 
 export default router

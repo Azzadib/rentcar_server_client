@@ -31,7 +31,7 @@ export default function ItemList() {
   const [openform, setOpenform] = useState(false)
   const [selectedCity, setSelectedcity] = useState('Select city')
   const [orderdata, setOrderdata] = useState({
-    phone: '',
+    order_phone: '',
     order_address: ''
   })
   const [formerror, setFormerror] = useState({
@@ -89,6 +89,7 @@ export default function ItemList() {
         lite_status: 'checkout',
         order_city: selectedCity,
         order_address: orderdata.order_address,
+        order_phone: orderdata.order_phone
       }
       dispatch(cartCheckoutActions(cartid, senddata)).then((result) => {
         console.log(result.data)
@@ -114,7 +115,7 @@ export default function ItemList() {
     let validated = true
     let err = {}
 
-    if (!orderdata.phone || !orderdata.phone.match("[+][0-9]{10}")) {
+    if (!orderdata.order_phone || !orderdata.phone.match("[+][0-9]{10}")) {
       validated = false
       err.phone = 'Pone number has wrong format'
     }
@@ -243,7 +244,7 @@ export default function ItemList() {
                   <div>Phone number</div>
                   <div className="text-red-600 text-sm mt-1 ml-2">{formerror.phone}</div>
                 </div>
-                <input type="tel" autoFocus={true} placeholder="+6281234567890" onChange={formOnChange('phone')}
+                <input type="tel" autoFocus={true} placeholder="+6281234567890" onChange={formOnChange('order_phone')}
                   className={`${formerror.phone? 'bg-red-500 text-black' : 'bg-blue-100 hover:bg-red-200 focus:bg-red-200'} block w-full border-none h-11 rounded-xl shadow-lg focus:ring-0`} />
                 <div className="mt-4 mb-2 flex">
                   <div>City</div>

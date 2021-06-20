@@ -8,6 +8,7 @@ import DetailPage from './Pages/DetailPage/DetailPage'
 import GaragePage from './Pages/GaragePage/GaragePage'
 import InvoicePage from './Pages/InvoicePage/InvoicePage'
 import LandingPage from './Pages/LandingPage/LandingPage'
+import OrderListPage from './Pages/OrderListPage/OrderListPage'
 import LoginPage from './Pages/UserPage/LoginPage'
 import SignupPage from './Pages/UserPage/SignupPage'
 
@@ -24,6 +25,7 @@ const MainRouter = () => {
         <PrivateRoute path="/garage" exact component={GaragePage} />
         <PrivateRoute path="/admin/addcar" exact component={AddEditPage}/>
         <PrivateRoute path="/admin/editcar/:carid" exact component={AddEditPage}/>
+        <PrivateRoute path="/myorder" exact component={OrderListPage}/>
       </Switch>
     </>
   )

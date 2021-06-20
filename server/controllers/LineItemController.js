@@ -16,6 +16,22 @@ const findLitebByCart = async (req, res, next) => {
     }
 }
 
+const litebByOrder = async (req, res, next) => {
+    try {
+        const name = req.params.name
+
+        const lite = await req.context.models.LineItem.findAll(
+            {
+                where: { lite_order_name: name }
+            }
+        )
+        req.resetcar = lite
+        next()
+    } catch (error) {
+        return res.status(500).send({ message: `Line item by order ${error}.` })
+    }
+}
+
 const findLitebByCar = async (req, res) => {
     try {
         const car = req.existscar
@@ -47,6 +63,20 @@ const findLitebByCarNum = async (req, res) => {
         return res.status(500).send({ message: `Find line item by car number ${error}.` })
     }
 }
+
+const findLitebByOrder = async (req, res) => {
+    try {
+        const lite = await req.context.models.LineItem.findAll(
+            {
+                where: { lite_order_name: req.params.name }
+            }
+        )
+        return res.status(200).send(lite)
+    } catch (error) {
+        return res.status(500).send({ message: `Find line item by order ${error}.` })
+    }
+}
+
 
 const existsLiteID = async (req, res, next) => {
     try {
@@ -260,6 +290,8 @@ export default {
     findLitebByCart,
     findLitebByCar,
     findLitebByCarNum,
+    findLitebByOrder,
+    litebByOrder,
     existsLiteID,
     existsLiteCC,
     createLite,

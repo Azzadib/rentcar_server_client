@@ -1,43 +1,45 @@
 import React, { useEffect, useState } from 'react'
-import { useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { useLocation } from 'react-router-dom'
 import logo from '../../assets/images/logo.png'
+import { orderLiteActions } from '../../Redux/Actions/OrderActions'
 import Car from '../../SericeApis/Car'
 
-export default function OrderResult() {
+export default function Invoice() {
   const location = useLocation()
-  const { items, ordersummary, order, orderdata, selectedCity } = location.data
-  console.log('items ', items)
-  console.log('summary ', ordersummary)
-  console.log('order ', order)
-  console.log('orderdata ', orderdata)
-  console.log('selectedCity ', selectedCity)
+  const dispatch = useDispatch()
+  const { order } = location.data
+  const [waiting, setWaiting] = useState(true)
 
   const userinfo = useSelector(state => state.login)
   const { user } = userinfo
   const [itemdetail, setItemdetail] = useState([])
 
+  const lites = useSelector(state => state.orderlite)
+  const { loading } = lites
   useEffect(() => {
-    items.map((item) => {
-      Car.getCar(item.lite_car_id).then((cardata) => {
-        setItemdetail(itemdetail => [...itemdetail, {
-          carprice: cardata.car_price,
-          carmanufacturer: cardata.car_manufacturer,
-          carmodel: cardata.car_model,
-          liteprice: item.lite_price,
-          litedays: item.lite_days,
-        }])
-      })
-    })
-  }, [])
+    dispatch(orderLiteActions(order.order_name))
+  }, [order])
 
   useEffect(() => {
-    if (items.length === itemdetail.length) {
-      console.log('items length', items.length)
-      console.log('itemdetail length', itemdetail.length)
+    setWaiting(true)
+    if (!loading) {
+      lites.orderlite.map((lite) => {
+        Car.getCar(lite.lite_car_id).then((cardata) => {
+          if (lite.lite_order_name == order.order_name) {
+            setItemdetail(itemdetail => [...itemdetail, {
+              carprice: cardata.car_price,
+              carmanufacturer: cardata.car_manufacturer,
+              carmodel: cardata.car_model,
+              liteprice: lite.lite_price,
+              litedays: lite.lite_days,
+            }])
+          }
+        })
+      })
     }
-  }, [itemdetail])
-  console.log('itemdetail', itemdetail)
+    setWaiting(false)
+  }, [lites])
 
   return (
     <div className="bg-gray-200">
@@ -51,22 +53,25 @@ export default function OrderResult() {
             <div className="max-w-sm font-medium text-sm">
               <div>{user ? user.user_name : 'User Name'}</div>
               <div>{user ? user.user_email : 'User Email'}</div>
-              <div>{orderdata ? orderdata.order_address : 'Full address'}</div>
-              <div>{selectedCity ? selectedCity : 'City'}</div>
-              <div>{orderdata ? orderdata.phone : ''}</div>
+              <div>{order ? order.order_address : 'Full address'}</div>
+              <div>{order ? order.order_city : 'City'}</div>
+              {/* <div>{orderdata ? orderdata.order_phone : ''}</div> */}
             </div>
             <div>
-              <div className="flex mt-3">
+              <div className="flex">
                 <div className="mr-2">Order number:</div>
                 <div className="font-semibold text-blue-600">{order.order_name}</div>
               </div>
               <div className="flex">
                 <div className="mr-2">Order date:</div>
-                <div className="font-semibold text-blue-600">{order.order_created_on}</div>
+                <div className="font-semibold text-blue-600">{order.order_created_on.split('T')[0]}</div>
+              </div>
+              <div className="flex">
+                <div className="mr-2">Order status:</div>
+                <div className="font-semibold text-blue-600">{order.order_status == 'open' ? 'Waiting payment' : `${order.order_status[0].toUpperCase()}${order.order_status.substring(1)}`}</div>
               </div>
             </div>
           </div>
-
           <div className="mt-5">
             <table className="min-w-full divide-y">
               <thead className="min-w-full bg-blue-200 divide-y border border-gray-400">
@@ -79,14 +84,17 @@ export default function OrderResult() {
               </thead>
               <tbody className="divide-y divide-gray-200">
                 {
-                  itemdetail.map((item) => (
-                    <tr>
-                      <td className="border border-gray-200">{item.carmanufacturer} {item.carmodel}</td>
-                      <td className="border border-gray-200 text-center">{item.litedays}</td>
-                      <td className="border border-gray-200 w-36 pl-1">Rp{item.carprice.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.')}</td>
-                      <td className="border border-gray-200 w-36 pl-1">Rp{item.liteprice.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.')}</td>
-                    </tr>
-                  ))
+                  waiting ?
+                    ''
+                    :
+                    itemdetail.map((item) => (
+                      <tr>
+                        <td className="border border-gray-200">{item.carmanufacturer} {item.carmodel}</td>
+                        <td className="border border-gray-200 text-center">{item.litedays}</td>
+                        <td className="border border-gray-200 w-36 pl-1">Rp{item.carprice.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.')}</td>
+                        <td className="border border-gray-200 w-36 pl-1">Rp{item.liteprice.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.')}</td>
+                      </tr>
+                    ))
                 }
               </tbody>
             </table>
@@ -109,9 +117,9 @@ export default function OrderResult() {
                     <div>:</div>
                   </div>
                   <div className="font-semibold">
-                    <div>{ordersummary.total_car}</div>
-                    <div>{ordersummary.total_days}</div>
-                    <div>Rp{ordersummary.total_due.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.')}</div>
+                    <div>{lites.orderlite ? lites.orderlite.length : '-'}</div>
+                    <div>{order.order_total_days}</div>
+                    <div>Rp{(order.order_total_due -order.order_tax + order.order_discount).toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.')}</div>
                     <div>Rp{order.order_discount.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.')}</div>
                     <div>Rp{order.order_tax.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.')}</div>
                   </div>

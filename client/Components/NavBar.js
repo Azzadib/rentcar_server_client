@@ -1,14 +1,17 @@
 import React, { useState, useEffect, Fragment } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import logo from '../assets/images/logo.png'
-import { Transition } from '@headlessui/react'
+import { Menu, Transition } from '@headlessui/react'
+import { LoginIcon, QuestionMarkCircleIcon } from '@heroicons/react/outline'
 import { Link, useHistory, useParams } from 'react-router-dom'
 import { logoutActions } from '../Redux/Actions/UserActions'
 import garagesvg from '../assets/svg/garage.svg'
 import wavesvg from '../assets/svg/wave.svg'
+import avatar from '../assets/svg/avatar.svg'
 
 export default function NavBar() {
   const [logedin, setLogedin] = useState(false)
+  const [profile, setProfile] = useState()
   const [isadmin, setIsadmin] = useState(false)
   const dispatch = useDispatch()
   const [count, setCount] = useState(0)
@@ -24,6 +27,8 @@ export default function NavBar() {
       const { user } = userdata
       if (user) setLogedin(true)
       if (user.user_type === 'Admin') setIsadmin(true)
+      setProfile(user)
+      console.log('user:', user)
     }
   }, [dispatch])
 
@@ -86,10 +91,69 @@ export default function NavBar() {
                 Dashboard
               </button>
             </Link>
-            <button onClick={() => dispatch(logoutActions())}
-              className={logedin ? 'ml-5 mt-5 text-lg font-semibold bg-white px-4 border-b-4 border-r-4 rounded-xl hover:scale-110 hover:transform active:transform active:translate-y-1 active:border-none active:ml-6 focus:outline-none' : 'hidden'}>
-              Logout
-            </button>
+            <Menu as="div" className={logedin? '' : 'hidden'}>
+              <div className="">
+                <Menu.Button className="justify-center w-full focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75">
+                  <img src={profile? profile.user_avatar? `http://localhost:3000/api/user/avatar/${profile.user_id}/${profile.user_avatar}` : avatar : avatar}
+                    className="w-12 ml-5 mt-5 rounded-full border-b-2 border-r-2 hover:scale-110 hover:transform active:transform active:translate-y-1 active:border-none"/>
+                </Menu.Button>
+              </div>
+              <Transition
+                as={Fragment}
+                enter="transition ease-out duration-100"
+                enterFrom="transform opacity-0 scale-95"
+                enterTo="transform opacity-100 scale-100"
+                leave="transition ease-in duration-75"
+                leaveFrom="transform opacity-100 scale-100"
+                leaveTo="transform opacity-0 scale-95"
+              >
+                <Menu.Items className="absolute -right-9 w-28 mt-2 origin-top-right bg-white rounded-xl shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                  <div className="px-1 py-1 ">
+                    <Menu.Item>
+                      {({ active }) => (
+                        <button onClick={() => window.location="/myorder"}
+                          className={`${active ? 'bg-purple-800 text-white' : ' text-purple-800'} font-semibold group flex rounded-xl items-center w-full px-2 py-2 text-sm focus:outline-none`}
+                        >
+                          My Orders
+                        </button>
+                      )}
+                    </Menu.Item>
+                    <Menu.Item>
+                      {({ active }) => (
+                        <button onClick={()=>{console.log('profile', profile); console.log('avatar', profile.user_avatar)}}
+                          className={`${active ? 'bg-purple-800 text-white' : ' text-purple-800'} font-semibold group flex rounded-xl items-center w-full px-2 py-2 text-sm focus:outline-none`}
+                        >
+                          My Profile
+                        </button>
+                      )}
+                    </Menu.Item>
+                  </div>
+                  <div className="px-1 py-1">
+                    <Menu.Item>
+                      {({ active }) => (
+                        <button
+                          className={`${active ? 'bg-purple-800 text-white' : ' text-purple-800'} font-semibold group flex rounded-xl items-center w-full px-1 py-2 text-sm focus:outline-none`}
+                        >
+                          <QuestionMarkCircleIcon className="w-6 mr-2"/>
+                          Help
+                        </button>
+                      )}
+                    </Menu.Item>
+                    <Menu.Item>
+                      {({ active }) => (
+                        <button onClick={() => dispatch(logoutActions())}
+                          className={`${active ? 'bg-purple-800 text-white' : ' text-purple-800'} font-semibold group flex rounded-xl items-center w-full px-1 py-2 text-sm focus:outline-none`}
+                        >
+                          <LoginIcon className="w-6 mr-2"/>
+                          Logout
+                        </button>
+                      )}
+                    </Menu.Item>
+                  </div>
+                </Menu.Items>
+              </Transition>
+            </Menu>
+            <div className={logedin? 'mt-8 ml-2' : 'hidden'}>{ profile? profile.user_name.split(' ')[0] : '' }</div>
           </div>
         </div>
         <img src={wavesvg} className={`${isOnTop || (window.location.href !== 'http://localhost:3000/') ? 'hidden' : ''} w-screen`} />

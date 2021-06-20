@@ -65,7 +65,8 @@ const findAllCarType = async (req, res) => {
                 ],
                 where: condition,
                 limit: carlimit,
-                offset: offset
+                offset: offset,
+                distinct: true
             }
         )
         const pages = Math.ceil(cars.count / carlimit)
@@ -313,6 +314,35 @@ const setNotAvailable = async (req, res, item, order) => {
     }
 }
 
+const resetCar = async (req, res) => {
+    try {
+        const selectedCar = req.resetcar
+        const order = req.neworder
+
+        for (const item of selectedCar) {
+            await setAvailable(req, res, item)
+        }
+        return res.status(201).send(order)
+    } catch (error) {
+        return res.status(500).send({ message: `Reset car ${error}.` })
+    }
+}
+
+const setAvailable = async (req, res, item) => {
+    try {
+        const car = await req.context.models.Car.update(
+            { car_user_id: null },
+            {
+                returning: true,
+                where: { car_id: item.lite_car_id }
+            }
+        )
+        if (!car) return res.status(404).send({ message: 'Car to be reset not found.' })
+    } catch (error) {
+        return res.status(500).send({ message: `Set available ${error}.` })
+    }
+}
+
 const deleteCar = async (req, res) => {
     try {
         const toDeleteCar = req.existscar
@@ -342,5 +372,6 @@ export default {
     updateCar,
     carAvailable,
     rentCar,
+    resetCar,
     deleteCar,
 }

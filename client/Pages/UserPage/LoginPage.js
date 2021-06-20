@@ -5,9 +5,10 @@ import wheel from '../../assets/svg/steering-wheel.svg'
 import { loginActions } from '../../Redux/Actions/UserActions'
 import { cartListActions } from '../../Redux/Actions/CartActions'
 import { Link, useHistory, useLocation } from 'react-router-dom'
+import { allOrderActions } from '../../Redux/Actions/OrderActions'
 
 export default function LoginPage(props) {
-  let from = props.location.from? props.location.from : '/'
+  let from = props.location.from ? props.location.from : '/'
   const history = useHistory();
   const location = useLocation();
 
@@ -46,10 +47,18 @@ export default function LoginPage(props) {
         if (res.data.status === 200) {
           dispatch(cartListActions(res.data.data.user.user_id)).then((result) => {
             if (result.data.status === 200) {
-              setSuccmsg('Login successful.')
-              setWaiting(false)
-              setUserdata({})
-              setGo(true)
+              dispatch(allOrderActions(res.data.data.user.user_id)).then((rslt) => {
+                if (rslt.data.status === 200) {
+                  setSuccmsg('Login successful.')
+                  setWaiting(false)
+                  setUserdata({})
+                  setGo(true)
+                }
+                else {
+                  setWaiting(false)
+                  setErrmsg(result.data.data.message)
+                }
+              })
             }
             else {
               setWaiting(false)
@@ -68,11 +77,11 @@ export default function LoginPage(props) {
   useEffect(() => {
     if (userinfo && go) {
       const redirect = location.search
-      ? new URLSearchParams(location.search).get("redirect")
-      : "/";
-      redirect == "/"? window.location=redirect : history.push(redirect)
+        ? new URLSearchParams(location.search).get("redirect")
+        : "/";
+      redirect == "/" ? window.location = redirect : history.push(redirect)
     }
-}, [userinfo, go])
+  }, [userinfo, go])
 
   const validation = () => {
     setErrmsg('')
