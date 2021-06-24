@@ -68,6 +68,7 @@ export default function HandleCar() {
   const [ac, setAc] = useState(false)
 
   const carData = useSelector((state) => state.carDetail)
+  const { loading } = carData
   useEffect(() => {
     if (carid && !carData.car.car_id) dispatch(carDetailActions(carid))
     if (carid) {
@@ -85,26 +86,28 @@ export default function HandleCar() {
       setAc(carData.car.car_ac)
       setBaggage(carData.car.car_baggage)
 
-      carData.car.car_images.map((image) => {
-        Caim.download(carData.car.car_number, image.caim_filename).then(result => {
-          if (image.caim_primary) setMainImg({
-            id: image.caim_id,
-            name: result.name,
-            imgfile: result,
-            img: URL.createObjectURL(result),
-            isNew: false
+      if (carData.car.car_images) {
+        carData.car.car_images.map((image) => {
+          Caim.download(carData.car.car_number, image.caim_filename).then(result => {
+            if (image.caim_primary) setMainImg({
+              id: image.caim_id,
+              name: result.name,
+              imgfile: result,
+              img: URL.createObjectURL(result),
+              isNew: false
+            })
+            else setSecImg(secImg => [...secImg, {
+              id: image.caim_id,
+              name: result.name,
+              imgfile: result,
+              img: URL.createObjectURL(result),
+              isNew: false
+            }])
           })
-          else setSecImg(secImg => [...secImg, {
-            id: image.caim_id,
-            name: result.name,
-            imgfile: result,
-            img: URL.createObjectURL(result),
-            isNew: false
-          }])
         })
-      })
+      }
     }
-  }, [carid])
+  }, [carid, loading])
 
   const handleOnChange = field => event => {
     if (field !== 'car_price') setCar({ ...car, [field]: event.target.value })

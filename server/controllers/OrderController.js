@@ -1,3 +1,5 @@
+import { sequelize } from "../../config/config-db"
+
 const createOrder = async (req, res, next) => {
     try {
         const notAvailable = req.isAvailable
@@ -63,8 +65,12 @@ const getOrderByName = async (req, res) => {
 
 const getAllOrder = async (req, res) => {
     try {
-        const order = await req.context.models.Order.findAll()
-        return res.status(200).send({ order })
+        const order = await req.context.models.Order.findAll({
+            order: [
+                ['order_name', 'DESC']
+            ]
+        })
+        return res.status(200).send(order)
     } catch (error) {
         return res.status(500).send({ message: `Get all order ${error}.` })
     }
@@ -85,6 +91,7 @@ const findOrderByName = async (req, res, next) => {
 const updateOrder = async (req, res, next) => {
     try {
         const status = req.params.status
+        console.log('upd stat', status)
         let { pyt_num } = req.body
         const oldorder = req.oldorder
         if (!oldorder) return res.status(404).send({ message: 'Order to be updated not found.'})
@@ -101,11 +108,24 @@ const updateOrder = async (req, res, next) => {
             }
         )
         if (!newOrder[0]) return res.status(500).send({ message: `Failed to update order.`})
-        if (status == 'paid' || status == 'rent' || status == 'open') return res.status(201).send(newOrder[1][0])
+        if (status !== 'closed' && status !== 'cancelled') return res.status(201).send(newOrder[1][0])
         req.neworder = newOrder[1][0]
+        console.log('go to cancel')
         next()
     } catch (error) {
         return res.status(500).send({ message: `Update order ${error}.`})
+    }
+}
+
+const countOrder = async (req, res) => {
+    try {
+        const ordercount = await sequelize.query(
+            "select count(order_name) as all_order, sum(case when order_status = 'open' then 1 else 0 end) as open_order, sum(case when order_status = 'paid' then 1 else 0 end) as paid_order, sum(case when order_status = 'cancelled' then 1 else 0 end) as cancelled_order, sum(case when order_status = 'rent' then 1 else 0 end) as active_order, sum(case when order_status = 'closed' then 1 else 0 end) as closed_order from orders",
+            { type: sequelize.QueryTypes.SELECT }
+        )
+        return res.status(200).send(ordercount[0])
+    } catch (error) {
+        return res.status(500).send({ message: `Count order ${error}.`})
     }
 }
 
@@ -116,4 +136,5 @@ export default {
     getAllOrder,
     findOrderByName,
     updateOrder,
+    countOrder,
 }

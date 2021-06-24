@@ -6,6 +6,7 @@ import { scrollActions } from '../../Redux/Actions/ScrollActions'
 import { Transition, Listbox, Dialog } from '@headlessui/react'
 import { CheckIcon, SelectorIcon } from '@heroicons/react/solid'
 import { useHistory } from 'react-router-dom'
+import { allOrderActions } from '../../Redux/Actions/OrderActions'
 
 const cities = [
   { name: 'Jakarta' },
@@ -39,12 +40,12 @@ export default function ItemList() {
     city: '',
     address: ''
   })
-  const [checkouterror, setCheckouterror] = useState('') 
+  const [checkouterror, setCheckouterror] = useState('')
 
   const itemincart = useSelector(state => state.cart)
 
   useEffect(() => {
-    dispatch(cartSummaryActions(cartid)).then((result) => {})
+    dispatch(cartSummaryActions(cartid)).then((result) => { })
   }, [waiting, itemincart, cartid, items])
   const summary = useSelector(state => state.cartsum)
   const { loading, cartsum } = summary
@@ -95,14 +96,22 @@ export default function ItemList() {
         console.log(result.data)
         if (result.data.status === 201) {
           dispatch(cartListActions(result.data.data.order_user_id)).then((res) => {
-            console.log('res', res)
-            history.push({
-              pathname: '/order/result',
-              data: { items, ordersummary, order: result.data.data, orderdata, selectedCity }
-            })
+            if (res.data.status === 200) {
+              dispatch(allOrderActions(result.data.data.order_user_id)).then((rslt) => {
+                if (rslt.data.status === 200) window.location = "/myorder"
+                else {
+                  setOpenform(false)
+                  setCheckouterror(rslt.data.data.message)
+                }
+              })
+            }
+            else {
+              setOpenform(false)
+              setCheckouterror(rslt.data.data.message)
+            }
           })
         }
-        else{
+        else {
           dispatch(cartListActions(result.data.data.order_user_id))
           setOpenform(false)
           setCheckouterror('One or more car is not available. Please edit Your cart.')
@@ -114,22 +123,18 @@ export default function ItemList() {
   const validateForm = () => {
     let validated = true
     let err = {}
-
-    if (!orderdata.order_phone || !orderdata.phone.match("[+][0-9]{10}")) {
+    if (!orderdata.order_phone || !orderdata.order_phone.match("[+][0-9]{10}")) {
       validated = false
       err.phone = 'Pone number has wrong format'
     }
-
     if (selectedCity === 'Select city') {
       validated = false
       err.city = 'You have to select a city'
     }
-
     if (!orderdata.order_address) {
       validated = false
       err.address = 'Address should not be empty'
     }
-
     setFormerror(err)
     return validated
   }
@@ -137,7 +142,7 @@ export default function ItemList() {
   return (
     <div className="bg-gray-200 h-100v">
       <div className="absolute text-white mt-28 w-screen z-30">
-        <div className={checkouterror? 'bg-red-600 max-w-sm mx-auto py-3 px-3 rounded-full text-center' : ''}>{checkouterror}</div>
+        <div className={checkouterror ? 'bg-red-600 max-w-sm mx-auto py-3 px-3 rounded-full text-center' : ''}>{checkouterror}</div>
       </div>
       <div className="relative py-16 mx-auto sm:max-w-xl md:max-w-full lg:max-w-screen-xl lg:py-20 px-12">
         <div className="mx-auto py-10">
@@ -194,7 +199,6 @@ export default function ItemList() {
                   className="bg-red-500 rounded-xl px-3 py-2 mt-8 w-64 text-white focus:outline-none active:bg-red-700">
                   Order Now.
                 </button>
-
               </div>
               <div className="text-xs ml-3 flex text-gray-500 mt-5">
                 <div className="mr-1 text-sm font-bold">*</div>
@@ -245,7 +249,7 @@ export default function ItemList() {
                   <div className="text-red-600 text-sm mt-1 ml-2">{formerror.phone}</div>
                 </div>
                 <input type="tel" autoFocus={true} placeholder="+6281234567890" onChange={formOnChange('order_phone')}
-                  className={`${formerror.phone? 'bg-red-500 text-black' : 'bg-blue-100 hover:bg-red-200 focus:bg-red-200'} block w-full border-none h-11 rounded-xl shadow-lg focus:ring-0`} />
+                  className={`${formerror.phone ? 'bg-red-500 text-black' : 'bg-blue-100 hover:bg-red-200 focus:bg-red-200'} block w-full border-none h-11 rounded-xl shadow-lg focus:ring-0`} />
                 <div className="mt-4 mb-2 flex">
                   <div>City</div>
                   <div className="text-red-600 text-sm mt-1 ml-4">{formerror.city}</div>
@@ -306,16 +310,15 @@ export default function ItemList() {
                   <div>Address</div>
                   <div className="text-red-600 text-sm mt-1 ml-2">{formerror.address}</div>
                 </div>
-                <textarea  placeholder="Full address" maxLength={450} rows={5} onChange={formOnChange('order_address')}
-                  className={`${formerror.address? 'bg-red-500' : 'bg-blue-100 hover:bg-red-200 focus:bg-red-200'} block w-full border-none rounded-xl shadow-lg focus:ring-0`}
+                <textarea placeholder="Full address" maxLength={450} rows={5} onChange={formOnChange('order_address')}
+                  className={`${formerror.address ? 'bg-red-500' : 'bg-blue-100 hover:bg-red-200 focus:bg-red-200'} block w-full border-none rounded-xl shadow-lg focus:ring-0`}
                 />
-                  <button
-                    className="inline-flex mt-4 mr-2 justify-center px-4 py-2 text-sm font-medium text-blue-900 bg-blue-100 border border-transparent rounded-md hover:bg-blue-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500"
-                    onClick={placeOrder}
-                  >
-                    Place Order
-                  </button>
-                
+                <button
+                  className="inline-flex mt-4 mr-2 justify-center px-4 py-2 text-sm font-medium text-blue-900 bg-blue-100 border border-transparent rounded-md hover:bg-blue-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500"
+                  onClick={placeOrder}
+                >
+                  Place Order
+                </button>
               </div>
             </Transition.Child>
           </div>

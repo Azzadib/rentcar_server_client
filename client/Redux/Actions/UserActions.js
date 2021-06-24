@@ -1,5 +1,9 @@
 import axios from 'axios'
 import {
+    ALL_USER_FAIL,
+    ALL_USER_REQUEST,
+    ALL_USER_SUCCESS,
+    DELETE_USER_REQUEST,
     USER_LOGIN_FAIL,
     USER_LOGIN_REQUEST,
     USER_LOGIN_SUCCESS,
@@ -45,4 +49,28 @@ export const logoutActions = () => async (dispatch) => {
     localStorage.removeItem('userCart')
     dispatch({ type: USER_LOGOUT})
     window.location = "/"
+}
+
+export const allUserActions = () => async (dispatch) => {
+    dispatch({
+        type: ALL_USER_REQUEST
+    })
+    try {
+        const data = await axios.get('/api/user/alluser')
+        dispatch({ type: ALL_USER_SUCCESS, payload: data})
+    } catch (error) {
+        dispatch({ type: ALL_USER_FAIL, payload: error.response })
+    }
+}
+
+export const deleteUserActions = (uid) => async (dispatch) => {
+    dispatch({
+        type: DELETE_USER_REQUEST
+    })
+    try {
+        const data = await axios.delete(`/api/user/${uid}`)
+        return { data }
+    } catch(error) {
+        return { data: error.response }
+    }
 }

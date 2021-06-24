@@ -106,7 +106,6 @@ const cartSummary = async (req, res, next) => {
                 type: sequelize.QueryTypes.SELECT
             }
         )
-        //if (summary[0].total_discount = 0 && summary[0].total_car > 5) summary[0] = { ...summary[0], total_discount: (summary[0].total_due * 0.95)}
         if (!order_city) return res.status(200).send(summary[0])
         req.summary = summary[0]
         next()

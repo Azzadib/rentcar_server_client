@@ -13,6 +13,7 @@ router.put('/:id/:folder', IndexController.UserController.existsUser, IndexContr
 router.delete('/:id', IndexController.UserController.existsUser, IndexController.UserController.deleteUser)
 router.delete('/:avatar/:id', IndexController.UserController.existsUser, IndexController.UserController.deleteUserAvatar)
 router.get('/signout', IndexController.UserController.signOut)
+router.get('/admin/usercount', IndexController.UserController.countUser)
 
 //* Download avatar
 router.get('/:folder/:subfol/:filename', IndexController.DownloadController.download)

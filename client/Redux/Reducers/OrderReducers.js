@@ -2,6 +2,9 @@ import {
     ALL_ORDER_FAIL,
     ALL_ORDER_REQUEST,
     ALL_ORDER_SUCCES,
+    GLOBAL_ORDER_FAIL,
+    GLOBAL_ORDER_REQUEST,
+    GLOBAL_ORDER_SUCCES,
     ONE_ORDER_FAIL,
     ONE_ORDER_REQUEST,
     ONE_ORDER_SUCCES,
@@ -92,6 +95,28 @@ export const updateOrderReducers = (
                 orderupdated: action.payload.data
             }
         case UPDATE_ORDER_FAIL:
+            return {
+                loading: false,
+                error: action.payload
+            }
+        default:
+            return state
+    }
+}
+
+export const globalOrderReducers = (
+    state = { loading: true, globalorder: [] },
+    action
+) => {
+    switch (action.type) {
+        case GLOBAL_ORDER_REQUEST:
+            return { loading: true }
+        case GLOBAL_ORDER_SUCCES:
+            return {
+                loading: false,
+                globalorder: action.payload.data,
+            }
+        case GLOBAL_ORDER_FAIL:
             return {
                 loading: false,
                 error: action.payload

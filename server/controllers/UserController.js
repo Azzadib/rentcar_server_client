@@ -137,6 +137,7 @@ const signUp = async (req, res) => {
         mailOptions = {...mailOptions, to: user.user_email}
         transporter.sendMail(mailOptions, function(error, info){
             if (error) return res.status(500).send({message: `Send mail ${error}.`})
+            console.log('SignUp info:', info)
             return res.status(201).send(
                 {
                     user_name: user.user_name,
@@ -358,6 +359,17 @@ const isAuthorized = (req, res, next) => {
     }
 }
 
+const countUser = async (req, res) => {
+    try {
+        const usercount = await req.context.models.User.count({
+            where: { user_type: 'User'}
+        })
+        return res.status(200).send({ total_user: usercount })
+    } catch (error) {
+        return res.status(500).send({ message: `Count user ${error}.`})
+    }
+}
+
 export default {
     findAllUsers,
     findOneUser,
@@ -372,4 +384,5 @@ export default {
     signOut,
     requireLogin,
     isAuthorized,
+    countUser
 }

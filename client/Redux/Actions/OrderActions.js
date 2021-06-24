@@ -3,6 +3,9 @@ import {
     ALL_ORDER_FAIL,
     ALL_ORDER_REQUEST,
     ALL_ORDER_SUCCES,
+    GLOBAL_ORDER_FAIL,
+    GLOBAL_ORDER_REQUEST,
+    GLOBAL_ORDER_SUCCES,
     ONE_ORDER_FAIL,
     ONE_ORDER_REQUEST,
     ONE_ORDER_SUCCES,
@@ -64,5 +67,17 @@ export const updateOrderActions = (status, name, pytnum) => async (dispatch) => 
     } catch (error) {
         dispatch({ type: UPDATE_ORDER_FAIL, payload: error.response })
         return { data: error.response }
+    }
+}
+
+export const globalOrderActions = () => async (dispatch) => {
+    dispatch({
+        type: GLOBAL_ORDER_REQUEST
+    })
+    try {
+        const data = await axios.get('/api/trans/allorder')
+        dispatch({ type: GLOBAL_ORDER_SUCCES, payload: data })
+    } catch (error) {
+        dispatch({ type: GLOBAL_ORDER_FAIL, payload: error.respone })
     }
 }

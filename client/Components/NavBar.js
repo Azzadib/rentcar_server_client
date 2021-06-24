@@ -2,8 +2,8 @@ import React, { useState, useEffect, Fragment } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import logo from '../assets/images/logo.png'
 import { Menu, Transition } from '@headlessui/react'
-import { LoginIcon, QuestionMarkCircleIcon } from '@heroicons/react/outline'
-import { Link, useHistory, useParams } from 'react-router-dom'
+import { LogoutIcon, QuestionMarkCircleIcon } from '@heroicons/react/outline'
+import { Link, useHistory } from 'react-router-dom'
 import { logoutActions } from '../Redux/Actions/UserActions'
 import garagesvg from '../assets/svg/garage.svg'
 import wavesvg from '../assets/svg/wave.svg'
@@ -28,7 +28,6 @@ export default function NavBar() {
       if (user) setLogedin(true)
       if (user.user_type === 'Admin') setIsadmin(true)
       setProfile(user)
-      console.log('user:', user)
     }
   }, [dispatch])
 
@@ -84,7 +83,7 @@ export default function NavBar() {
               </button>
             </Link>
             <Link to={{
-              pathname: '/admin/addcar',
+              pathname: '/admin',
               from: typeof window === 'object' ? window.location.href ? window.location.href : '/' : '/'
             }}>
               <button className={isadmin ? 'ml-5 mt-5 text-lg py-2 font-semibold bg-white px-4 border-b-4 border-r-4 rounded-xl hover:scale-110 hover:transform active:transform active:translate-y-1 active:border-none active:ml-6 focus:outline-none' : 'hidden'}>
@@ -144,7 +143,7 @@ export default function NavBar() {
                         <button onClick={() => dispatch(logoutActions())}
                           className={`${active ? 'bg-purple-800 text-white' : ' text-purple-800'} font-semibold group flex rounded-xl items-center w-full px-1 py-2 text-sm focus:outline-none`}
                         >
-                          <LoginIcon className="w-6 mr-2"/>
+                          <LogoutIcon className="w-6 mr-2"/>
                           Logout
                         </button>
                       )}

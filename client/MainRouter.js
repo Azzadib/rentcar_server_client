@@ -1,6 +1,7 @@
 import React from 'react'
 import { Switch, Route } from 'react-router-dom'
 import AddEditPage from './Admin/AddEditPage/AddEditPage'
+import DashboardPage from './Admin/DashboardPage/DashboardPage'
 import AdminRoute from './auth/AdminRoute'
 import PrivateRoute from './auth/PrivateRoute'
 import CarByTypePage from './Pages/CarByType/CarByTypePage'
@@ -16,16 +17,17 @@ const MainRouter = () => {
   return (
     <>
       <Switch>
-        <Route path="/login" exact component={LoginPage} />
         <Route path="/signup" exact component={SignupPage}/>
-        <Route path="/" exact component={LandingPage} />
-        <Route path="/view/:type" exact component={CarByTypePage} />
-        <Route path="/detail/:id" exact component={DetailPage} />
-        <Route path="/order/result" exact component={InvoicePage}/>
-        <PrivateRoute path="/garage" exact component={GaragePage} />
+        <Route path="/login" exact component={LoginPage}/>
+        <Route path="/" exact component={LandingPage}/>
+        <Route path="/view/:type" exact component={CarByTypePage}/>
+        <Route path="/detail/:id" exact component={DetailPage}/>
+        <PrivateRoute path="/garage" exact component={GaragePage}/>
+        <PrivateRoute path="/myorder" exact component={OrderListPage}/>
+        <PrivateRoute path="/order/result" exact component={InvoicePage}/>
+        <PrivateRoute path="/admin" exact component={DashboardPage}/>
         <PrivateRoute path="/admin/addcar" exact component={AddEditPage}/>
         <PrivateRoute path="/admin/editcar/:carid" exact component={AddEditPage}/>
-        <PrivateRoute path="/myorder" exact component={OrderListPage}/>
       </Switch>
     </>
   )

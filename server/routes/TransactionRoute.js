@@ -37,6 +37,8 @@ router.post('/order/:id', IndexController.CarCartController.existsCartID, IndexC
 //* Get orders
 router.get('/myorders/:id', IndexController.OrderController.getOrderByUser)
 router.get('/order/:name', IndexController.OrderController.getOrderByName)
+router.get('/ordercount', IndexController.OrderController.countOrder)
+router.get('/allorder', IndexController.OrderController.getAllOrder)
 
 //* Update order
 router.put('/order/:status/:name',

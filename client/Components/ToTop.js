@@ -27,7 +27,7 @@ export default function ToTop() {
         leaveFrom="opacity-100"
         leaveTo="opacity-0"
     >
-      <button className="fixed right-10 bottom-20 animate-bounce z-50 focus:outline-none" onClick={scrollToTop}>
+      <button className="fixed right-1 bottom-3 animate-bounce z-50 focus:outline-none" onClick={scrollToTop}>
         <img src={rocketIcon} className="w-16 mx-auto" />
         <img src={fireIcon} className="w-8 mx-auto transform rotate-180 animate-pulse-fast" />
       </button>

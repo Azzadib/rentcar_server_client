@@ -10,6 +10,7 @@ import comingicon from '../../assets/svg/coming.svg'
 import doneicon from '../../assets/svg/done.svg'
 import activeicon from '../../assets/svg/active.svg'
 import { allOrderActions, updateOrderActions } from '../../Redux/Actions/OrderActions'
+import Order from '../../SericeApis/Order'
 
 export default function OrderList() {
   const dispatch = useDispatch()
@@ -23,7 +24,7 @@ export default function OrderList() {
 
   const [waiting, setWaiting] = useState(true)
 
-  const [pymntres, setPymntres] = useState('')
+  const [pymntres, setPymntres] = useState({})
 
   let orderlist = useSelector(state => state.allorder)
   useEffect(() => {
@@ -57,7 +58,7 @@ export default function OrderList() {
 
   useEffect(() => {
     if (pymntres.payt_trx_number) {
-      dispatch(updateOrderActions('cancel', pymntres.order_number, { 'pyt_num': pymntres.payt_trx_number })).then((result) => {
+      dispatch(updateOrderActions('paid', pymntres.payt_order_number, { 'pyt_num': pymntres.payt_trx_number })).then((result) => {
         if (result.data.status === 201) {
           dispatch(allOrderActions(result.data.data.order_user_id)).then((res)=> {
             if (res.data.status == 200) history.push({
@@ -73,6 +74,12 @@ export default function OrderList() {
   }, [pymntres])
 
   const cancelOrder = (toCncl) => {
+    if (toCncl.order_pay_trx_number) {
+      const data = { payt_trx_number_ref: toCncl.order_pay_trx_number }
+      Order.refund(data).then((r) => {
+      console.log('cancel:', r)
+    })
+    }
     dispatch(updateOrderActions('cancelled', toCncl.order_name)).then((result) => {
       if (result.data.status === 201) {
         dispatch(allOrderActions(result.data.data.order_user_id)).then((res)=> {

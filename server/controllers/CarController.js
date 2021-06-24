@@ -2,6 +2,7 @@ import fs from 'fs'
 import path from 'path'
 //import { sequelize } from '../../config/config-db'
 import Sequelize from 'sequelize'
+import { sequelize } from '../../config/config-db'
 
 const photoDir = process.cwd() + '/images'
 
@@ -61,7 +62,6 @@ const findAllCarType = async (req, res) => {
                 ],
                 order: [
                     [carorder, carsort],
-                    
                 ],
                 where: condition,
                 limit: carlimit,
@@ -362,6 +362,18 @@ const deleteCar = async (req, res) => {
     }
 }
 
+const countCar = async (req, res) => {
+    try {
+        const carcount = await sequelize.query(
+            "select count(car_number) as all_car, sum(case when car_type = 'sedan' then 1 else 0 end) as total_sedan, sum(case when car_type = 'suv' then 1 else 0 end) as total_suv, sum(case when car_type = 'truck' then 1 else 0 end) as total_truck from cars",
+            { type: sequelize.QueryTypes.SELECT }
+        )
+        return res.status(200).send(carcount[0])
+    } catch (error) {
+        return res.status(500).send({ message: `Count car ${error}.`})
+    }
+}
+
 export default {
     findAllCar,
     findAllCarType,
@@ -374,4 +386,5 @@ export default {
     rentCar,
     resetCar,
     deleteCar,
+    countCar,
 }

@@ -1,7 +1,12 @@
-import { createStore, applyMiddleware, combineReducers } from 'redux'
+import {
+    createStore,
+    applyMiddleware,
+    combineReducers
+} from 'redux'
 import { composeWithDevTools } from 'redux-devtools-extension'
 import thunk from 'redux-thunk'
 import {
+    allCarReducers,
     carByTypeReducers,
     carDetailReducers,
 } from './Reducers/CarReducers'
@@ -13,9 +18,16 @@ import {
 import {
     addLiteReducers,
 } from './Reducers/LiteReducers'
-import { allOrderReducers, oneOrderReducers, orderLiteReducers, updateOrderReducers } from './Reducers/OrderReducers'
+import { 
+    allOrderReducers,
+    globalOrderReducers,
+    oneOrderReducers,
+    orderLiteReducers,
+    updateOrderReducers
+} from './Reducers/OrderReducers'
 import { scrollReducers } from './Reducers/ScrollReducers'
 import {
+    allUserReducers,
     userLoginReducers,
     userSignupReducers
 } from './Reducers/UserReducers'
@@ -67,6 +79,9 @@ const reducer = combineReducers({
     orderlite: orderLiteReducers,
     orderupdated: updateOrderReducers,
     signUp: userSignupReducers,
+    userList: allUserReducers,
+    carList: allCarReducers,
+    orderList: globalOrderReducers
 })
 
 const store = createStore(

@@ -11,5 +11,6 @@ router.post('/:folder/:number', IndexController.CarController.findOneCarNum, Ind
     IndexController.CarController.createCar, IndexController.CarImageController.createCarImage, IndexController.CarController.findOneCar)
 router.put('/:id', IndexController.CarController.findOneCarID, IndexController.CarController.updateCar)
 router.delete('/:id', IndexController.CarController.findOneCarID, IndexController.CarController.deleteCar)
+router.get('/admin/carcount', IndexController.CarController.countCar)
 
 export default router

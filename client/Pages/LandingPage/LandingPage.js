@@ -4,7 +4,7 @@ import Footer from './Footer'
 import Hero from './Hero'
 import NavBar from '../../Components/NavBar'
 import ToTop from '../../Components/ToTop'
-import WeDone from './WeDone'
+import WhyUs from './WhyUs'
 
 export default function LandingPage() {
   return (
@@ -15,8 +15,8 @@ export default function LandingPage() {
       <main>
         <Hero/>
         <CarType/>
-        <WeDone/>
-        <ToTop />
+        <WhyUs/>
+        <ToTop/>
       </main>
       <footer>
         <Footer/>
