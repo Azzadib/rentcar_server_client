@@ -65,9 +65,9 @@ export default function Cars() {
   const [passenger, setPassenger] = useState({ item: 'Select' })
 
   const showsLists = [
-    { item: 4 },
-    { item: 8 },
-    { item: 16 },
+    { item: 3 },
+    { item: 6 },
+    { item: 9 },
   ]
   const [shows, setShows] = useState({ item: 'Select' })
 
@@ -76,7 +76,7 @@ export default function Cars() {
     { item: 'Rating' }
   ]
   const [sortby, setSortby] = useState({ item: 'Select' })
-  
+
   const sortLists = [
     { item: 'ASC' },
     { item: 'DESC' }
@@ -94,6 +94,11 @@ export default function Cars() {
     if (!isNaN(event.target.value)) setMaxprice(event.target.value)
   }
 
+  const [searchword, setSearchWord] = useState('')
+  const ChangeSearch = event => {
+    setSearchWord(event.target.value)
+  }
+
   const applyQuery = () => {
     let tempQuery = ''
     if (manufacturer.item !== 'Select') tempQuery += `&manufac=${manufacturer.item}`
@@ -103,6 +108,7 @@ export default function Cars() {
     if (maxprice) tempQuery += `&maxprice=${maxprice}`
     if (sort.item !== 'Select') tempQuery += `&sort=${sort.item}`
     if (sortby.item !== 'Select') tempQuery += `&order=car_${sortby.item.toLocaleLowerCase()}`
+    if (searchword) tempQuery += `&search=${searchword}`
     if (tempQuery) setQuery(tempQuery)
   }
 
@@ -113,7 +119,8 @@ export default function Cars() {
     setMinprice()
     setMaxprice()
     setSort(sortLists[0])
-    setSortby({ item: 'Select'})
+    setSortby({ item: 'Select' })
+    setSearchWord('')
     if (query) setQuery()
   }
 
@@ -126,6 +133,7 @@ export default function Cars() {
     if (maxprice) tempQuery += `&maxprice=${maxprice}`
     if (sort.item !== 'Select') tempQuery += `&sort=${sort.item}`
     if (sortby.item !== 'Select') tempQuery += `&order=car_${sortby.item.toLocaleLowerCase()}`
+    if (searchword) tempQuery += `&search=${searchword}`
     tempQuery += `&page=${slctPage}`
     console.log('query:', tempQuery)
     setQuery(tempQuery)
@@ -133,7 +141,7 @@ export default function Cars() {
 
   const selectorWidget = (type, setted) => (
     <div className="">
-      <Listbox value={type} onChange={type === manufacturerLists ? setManufacturer : type === passengerLists ? setPassenger : type === sortByLists? setSortby : type === sortLists? setSort : type === showsLists ? setShows : setSort}>
+      <Listbox value={type} onChange={type === manufacturerLists ? setManufacturer : type === passengerLists ? setPassenger : type === sortByLists ? setSortby : type === sortLists ? setSort : type === showsLists ? setShows : setSort}>
         {({ open }) => (
           <>
             <div className="relative">
@@ -153,7 +161,7 @@ export default function Cars() {
                 leaveFrom="opacity-100"
                 leaveTo="opacity-0"
               >
-                <Listbox.Options static className="absolute w-auto z-20 py-1 mt-1 overflow-auto text-base bg-white rounded-md shadow-lg max-h-60 ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+                <Listbox.Options static className={`${open ? 'z-50' : ''} absolute w-auto py-1 mt-1 overflow-auto text-base bg-white rounded-md shadow-lg max-h-60 ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm`}>
                   {type.map((component, itemIdx) => (
                     <Listbox.Option
                       key={itemIdx}
@@ -195,7 +203,7 @@ export default function Cars() {
 
   return (
     <div className="bg-gray-100">
-      <div className="relative min-h-screen px-4 py-16 mx-auto sm:max-w-xl md:max-w-full lg:max-w-screen-xl md:px-24 lg:px-8 lg:py-20">
+      <div className="relative min-h-screen px-4 py-20">
         <div className="absolute inset-x-0 top-0 items-center justify-center hidden overflow-hidden md:flex md:inset-y-0">
           <svg
             viewBox="0 0 88 88"
@@ -232,111 +240,137 @@ export default function Cars() {
             />
           </svg>
         </div>
-        {
-          loading ?
-            ''
-            :
-            cars.rows.length > 0 ?
-              <div className="mt-10 flex">
-                <div className="z-10">Manufacturer:</div>
-                <div className="ml-1 h-5v z-20 w-28">{selectorWidget(manufacturerLists, manufacturer)}</div>
-                <div className="ml-3 z-20">Passenger:</div>
-                <div className="ml-1 h-5v z-20 w-20">{selectorWidget(passengerLists, passenger)}</div>
-                <div className="ml-3 z-20">Shows:</div>
-                <div className="ml-1 h-5v z-20 w-20">{selectorWidget(showsLists, shows)}</div>
-                <div className="ml-3 z-20">Price:</div>
-                <input type="text" className="ml-1 -mt-1 z-20 w-24 h-5v focus:ring-0" placeholder="Minimum" value={minprice} onChange={ChangeMin}/>
-                <input type="text" className="ml-1 -mt-1 z-20 w-24 h-5v focus:ring-0" placeholder="Maximum" value={maxprice} onChange={ChangeMax}/>
-                <div className="ml-3 z-20">Sort by:</div>
-                <div className="ml-1 h-5v z-20 w-20">{selectorWidget(sortByLists, sortby)}</div>
-                <div className="ml-1 h-5v z-20 w-20">{selectorWidget(sortLists, sort)}</div>
-                <button className="ml-5 z-20 bg-white py-1 px-2 h-7v -mt-2 text-red-700 rounded-xl border-2 font-semibold border-red-700 focus:outline-none" onClick={applyQuery}>Apply</button>
-                <button className="ml-5 z-20 bg-red-700 py-1 px-2 h-7v -mt-2 text-white rounded-xl font-semibold focus:outline-none" onClick={clearQuery}>Clear filter</button>
-              </div>
-              :
-              ''
-        }
-        {loading? '' : cars.rows.length > 0 ? <div className="text-blue-700">Page {cars.page} of {cars.pages}</div> : ''}
-        <div className="container mx-auto bg-gray-100 mt-5 flex flex-wrap justify-center gap-5">
-          {
-            error ?
-              <div className="z-40">
-                <img src={searcherror} className="w-80" onLoad={() => setShowsorry(true)} />
-                <div className={showsorry ? "text-center text-lg text-gray-500 font-bold" : "hidden"}>{error && error.data.message}</div>
-              </div>
-              :
+        <div className="flex justify-start">
+          <div>
+            {loading ? '' : cars.rows.length > 0 ? <div className="text-blue-700 mt-10">Page {cars.page} of {cars.pages}</div> : ''}
+            {
               loading ?
-                runCallback(() => {
-                  const row = []
-                  for (let i = 0; i < 8; i++) {
-                    row.push(
-                      <LoadingCarCards key={i}></LoadingCarCards>
-                    )
-                  }
-                  return row
-                })
+                ''
                 :
                 cars.rows.length > 0 ?
-                  cars.rows.map((car, index) => (
-                    <Carcards car={car} key={index} loading={loading}></Carcards>
-                  ))
-                  :
-                  <div className="z-40">
-                    <img src={search1} className="max-w-sm" onLoad={() => setShowsorry(true)} />
-                    <div className={showsorry ? "text-center max-w-md text-gray-600" : "hidden"}>Sorry. It looks like we have no available car with this type. Contact us for more information.</div>
+                  <div className="mt-5">
+                    <div className="flex">
+                      <input type="text" className="h-5v focus:outline-none focus:ring-0 focus:ring-transparent border border-red-500 w-full z-20" placeholder="Search here" value={searchword} onChange={ChangeSearch} />
+                    </div>
+                    <div className="flex mt-3">
+                      <div className="z-10">Manufacturer</div>
+                      <div className="ml-1">:</div>
+                      <div className="ml-2 h-5v w-28">{selectorWidget(manufacturerLists, manufacturer)}</div>
+                    </div>
+                    <div className="flex mt-3">
+                      <div className="z-20">Passenger</div>
+                      <div className="ml-7">:</div>
+                      <div className="ml-2 h-5v w-20">{selectorWidget(passengerLists, passenger)}</div>
+                    </div>
+                    <div className="flex mt-3">
+                      <div className="z-20">Shows</div>
+                      <div className="ml-14">:</div>
+                      <div className="ml-2 h-5v w-20">{selectorWidget(showsLists, shows)}</div>
+                    </div>
+                    <div className="flex mt-3">
+                      <div className="z-20">Price</div>
+                      <div className="ml-10 mr-2">:</div>
+                      <input type="text" className="ml-1 -mt-1 w-24 z-40 h-5v focus:ring-0" placeholder="Minimum" value={minprice} onChange={ChangeMin} />
+                      <input type="text" className="ml-1 -mt-1 w-24 z-40 h-5v focus:ring-0" placeholder="Maximum" value={maxprice} onChange={ChangeMax} />
+                    </div>
+                    <div className="flex mt-3">
+                      <div className="z-20">Sort by</div>
+                      <div className="ml-6">:</div>
+                      <div className="ml-2 h-5v w-20">{selectorWidget(sortByLists, sortby)}</div>
+                      <div className="ml-1 h-5v w-20">{selectorWidget(sortLists, sort)}</div>
+                    </div>
+                    <div className="flex mt-3">
+                      <button className="ml-5 z-30 bg-white py-1 px-2 h-7 text-red-700 rounded-xl border-2 font-semibold border-red-700 focus:outline-none" onClick={applyQuery}>Apply</button>
+                      <button className="ml-5 z-30 bg-red-700 py-1 px-2 h-7v text-white rounded-xl font-semibold focus:outline-none" onClick={clearQuery}>Clear filter</button>
+                    </div>
                   </div>
-          }
-        </div>
-        {
-          loading ?
-            ''
-            :
-            cars.rows.length > 0 ?
-              <div class="flex justify-center mt-10 space-x-1">
-                <button onClick={()=> {cars.page > 1? movePage(cars.page - 1) : null }}
-                  class={`${cars.page > 1? 'text-indigo-600 hover:bg-blue-200' : 'text-gray-400'} flex items-center justify-center h-8 w-8 rounded focus:outline-none z-20`}
-                >
-                  <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" disabled={cars.page === 1}>
-                    <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
-                  </svg>
-                </button>
-                <button onClick={()=> {cars.page > 1? movePage(cars.page - 1) : null }}
-                  class={`${cars.page > 1? 'text-indigo-600 hover:bg-blue-200' : 'text-gray-400'} flex items-center justify-center h-8 px-2 rounded text-sm font-medium focus:outline-none z-20`} disabled={cars.page === 1}
-                >
-                  Prev
-                </button>
-                {
+                  :
+                  ''
+            }
+          </div>
+          <div>
+            <div className="mx-auto ml-10 bg-gray-100 mt-5 flex flex-wrap justify-start gap-10">
+              {
+                error ?
+                  <div className="z-40">
+                    <img src={searcherror} className="w-80" onLoad={() => setShowsorry(true)} />
+                    <div className={showsorry ? "text-center text-lg text-gray-500 font-bold" : "hidden"}>{error && error.data.message}</div>
+                  </div>
+                  :
+                  loading ?
+                    runCallback(() => {
+                      const row = []
+                      for (let i = 0; i < 8; i++) {
+                        row.push(
+                          <LoadingCarCards key={i}></LoadingCarCards>
+                        )
+                      }
+                      return row
+                    })
+                    :
+                    cars.rows.length > 0 ?
+                      cars.rows.map((car, index) => (
+                        <Carcards car={car} key={index} loading={loading}></Carcards>
+                      ))
+                      :
+                      <div className="ml-96 z-40">
+                        <img src={search1} className="max-w-sm ml-4" onLoad={() => setShowsorry(true)} />
+                        <div className={showsorry ? "text-center max-w-md ml-5 text-gray-600" : "hidden"}>Sorry. It looks like we have no available car with this type. Contact us for more information.</div>
+                      </div>
+              }
+            </div>
+            {
+              loading ?
+                ''
+                :
+                cars.rows.length > 0 ?
+                  <div class="flex justify-center mt-10 space-x-1">
+                    <button onClick={() => { cars.page > 1 ? movePage(cars.page - 1) : null }}
+                      class={`${cars.page > 1 ? 'text-indigo-600 hover:bg-blue-200' : 'text-gray-400'} flex items-center justify-center h-8 w-8 rounded focus:outline-none z-20`}
+                    >
+                      <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" disabled={cars.page === 1}>
+                        <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
+                      </svg>
+                    </button>
+                    <button onClick={() => { cars.page > 1 ? movePage(cars.page - 1) : null }}
+                      class={`${cars.page > 1 ? 'text-indigo-600 hover:bg-blue-200' : 'text-gray-400'} flex items-center justify-center h-8 px-2 rounded text-sm font-medium focus:outline-none z-20`} disabled={cars.page === 1}
+                    >
+                      Prev
+                    </button>
+                    {
 
-                  runCallback(() => {
-                    const row = []
-                    for (let i = 0; i < cars.pages; i++) {
-                      row.push(
-                        <button onClick={()=> movePage(i + 1)}
-                          class={`${cars.page == (i+1)? 'bg-blue-200' : ''} flex items-center justify-center h-8 w-8 rounded text-sm font-medium text-indigo-600 hover:bg-blue-200 focus:outline-none z-20`}
-                        >
-                          {i + 1}
-                        </button>
-                      )
+                      runCallback(() => {
+                        const row = []
+                        for (let i = 0; i < cars.pages; i++) {
+                          row.push(
+                            <button onClick={() => movePage(i + 1)}
+                              class={`${cars.page == (i + 1) ? 'bg-blue-200' : ''} flex items-center justify-center h-8 w-8 rounded text-sm font-medium text-indigo-600 hover:bg-blue-200 focus:outline-none z-20`}
+                            >
+                              {i + 1}
+                            </button>
+                          )
+                        }
+                        return row
+                      })
                     }
-                    return row
-                  })
-                }
-                <button onClick={()=> {cars.page < cars.pages? movePage(parseInt(cars.page) + 1) : null }}
-                  class={`${cars.page < cars.pages? 'text-indigo-600 hover:bg-blue-200' : 'text-gray-400'} flex items-center justify-center h-8 px-2 rounded text-sm font-medium focus:outline-none z-20`}
-                >
-                  Next
-                </button>
-                <button onClick={()=> {cars.page < cars.pages? movePage(parseInt(cars.page) + 1) : null }}
-                  class={`${cars.page < cars.pages? 'text-indigo-600 hover:bg-blue-200' : 'text-gray-400'} flex items-center justify-center h-8 w-8 rounded focus:outline-none z-20`}
-                >
-                  <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                    <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
-                  </svg>
-                </button>
-              </div>
-              :
-              ''
-        }
+                    <button onClick={() => { cars.page < cars.pages ? movePage(parseInt(cars.page) + 1) : null }}
+                      class={`${cars.page < cars.pages ? 'text-indigo-600 hover:bg-blue-200' : 'text-gray-400'} flex items-center justify-center h-8 px-2 rounded text-sm font-medium focus:outline-none z-20`}
+                    >
+                      Next
+                    </button>
+                    <button onClick={() => { cars.page < cars.pages ? movePage(parseInt(cars.page) + 1) : null }}
+                      class={`${cars.page < cars.pages ? 'text-indigo-600 hover:bg-blue-200' : 'text-gray-400'} flex items-center justify-center h-8 w-8 rounded focus:outline-none z-20`}
+                    >
+                      <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                      </svg>
+                    </button>
+                  </div>
+                  :
+                  ''
+            }
+          </div>
+        </div>
       </div>
     </div>
   )

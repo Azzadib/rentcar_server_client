@@ -48,7 +48,7 @@ const findAllCarType = async (req, res) => {
 
         if (manufac) condition = { ...condition, car_manufacturer: { [Op.iLike]: manufac }}
         if (pssngr) condition = { ...condition, car_passenger: pssngr }
-        const carlimit = limit? limit : 8
+        const carlimit = limit? limit : 6
         const carpage = page? page : 1
         const carorder = order? order : 'car_number'
         const carsort = sort? sort : 'ASC'
