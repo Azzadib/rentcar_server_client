@@ -1,3 +1,5 @@
+import { formatDistanceStrict, parseISO, addDays } from 'date-fns'
+
 const findLitebByCart = async (req, res, next) => {
     try {
         const cart = req.existscartid
@@ -121,13 +123,18 @@ const existsLiteCC = async (req, res, next) => {
 
 const createLite = async (req, res) => {
     try {
+        console.log('create lite1')
         const car = req.existsnumber
         if (!car) return res.status(404).send({ message: 'Car to be rent is not found.' })
 
         const cart = req.existscart
         if (!cart) return res.status(404).send({ message: 'Cart is not available.' })
 
-        let { lite_days, lite_status } = req.body
+        let { lite_status, lite_start, lite_end } = req.body
+        lite_start = lite_start === undefined? addDays(new Date(), 1) : parseISO(lite_start)
+        lite_end =  lite_end === undefined? lite_start : parseISO(lite_end)
+        if (lite_end < lite_start) return res.status(400).send({ message: 'End date should be at the same or after start date.' })
+        const lite_days = parseInt(formatDistanceStrict(lite_start, addDays(lite_end, 1)).split(' ')[0])
         if (lite_days === undefined || isNaN(lite_days)) return res.status(400).send({ message: 'Rent duration is null or has wrong type.' })
         if (lite_days < 1) return res.status(400).send({ message: `Minimum rent days is 1 day. Found: ${lite_days}.` })
         if (lite_days > 14) return res.status(400).send({ message: `Can\'t rent each car more than 14 days. Found: ${lite_days} days.` })
@@ -136,18 +143,21 @@ const createLite = async (req, res) => {
         const lite_discount = lite_days > 2 ? (0.15 * lite_price) : 0
 
         if (lite_status === undefined) lite_status = 'cart'
-
+        console.log('create lite2')
         const lite = await req.context.models.LineItem.create(
             {
                 lite_days: lite_days,
                 lite_price: lite_price,
                 lite_discount: lite_discount,
+                lite_start: lite_start,
+                lite_end: lite_end,
                 lite_status: 'cart',
                 lite_car_id: car.car_id,
                 lite_cart_id: cart.cart_id
             }
         )
         if (!lite) return res.status(500).send({ message: 'Failed to add item to cart.' })
+        console.log('create lite3')
         return res.status(201).send(lite)
     } catch (error) {
         return res.status(500).send({ message: `Create line item ${error}.` })
@@ -165,8 +175,12 @@ const editLiteCC = async (req, res, next) => {
         const exists = req.existsliteCC
 
         if (exists) {
-            const { lite_days } = req.body
-            if (lite_days === undefined || isNaN(lite_days)) return res.status(400).send({ message: 'Rent duration is null or has wrong type.' })
+            let { lite_start, lite_end } = req.body
+            if (lite_end < lite_start) return res.status(400).send({ message: 'End date should be at the same or after start date.' })
+            lite_start = parseISO(lite_start)
+            lite_end = parseISO(lite_end)
+            const lite_days = parseInt(formatDistanceStrict(lite_start, addDays(lite_end, 1)).split(' ')[0])
+            if (lite_days === undefined || isNaN(lite_days)) return res.status(400).send({ message: `Rent duration is null or has wrong type. Found: ${lite_days}.` })
             if (lite_days < 1) return res.status(400).send({ message: `Minimum rent days is 1 day. Found: ${lite_days}.` })
             if (lite_days > 14) return res.status(400).send({ message: `Can\'t rent each car more than 14 days. Found: ${lite_days} days.` })
 
@@ -177,6 +191,8 @@ const editLiteCC = async (req, res, next) => {
             const lite = await req.context.models.LineItem.update(
                 {
                     lite_days: lite_days,
+                    lite_start: lite_start,
+                    lite_end: lite_end,
                     lite_price: lite_price,
                     lite_discount: lite_discount
                 },
@@ -204,7 +220,11 @@ const editLiteID = async (req, res) => {
         const car = req.existscar
         if (!car) return res.status(404).send({ message: 'Item can\'t be updated because car to be rent is not found.' })
 
-        const { lite_days } = req.body
+        let { lite_start, lite_end } = req.body
+        if (lite_end < lite_start) return res.status(400).send({ message: 'End date should be at the same or after start date.' })
+        lite_start = parseISO(lite_start)
+        lite_end = parseISO(lite_end)
+        const lite_days = parseInt(formatDistanceStrict(lite_start, addDays(lite_end, 1)).split(' ')[0])
         if (lite_days === undefined || isNaN(lite_days)) return res.status(400).send({ message: 'Rent duration is null or has wrong type.' })
         if (lite_days < 1) return res.status(400).send({ message: `Minimum rent days is 1 day. Found: ${lite_days}.` })
         if (lite_days > 14) return res.status(400).send({ message: `Can\'t rent each car more than 14 days. Found: ${lite_days} days.` })

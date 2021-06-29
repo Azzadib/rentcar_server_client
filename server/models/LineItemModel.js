@@ -11,6 +11,14 @@ const lineItem = (sequelize, DataTypes) => {
       allowNull: true,
       defaultValue: 1
     },
+    lite_start: {
+      type: DataTypes.DATEONLY,
+      allowNull: true
+    },
+    lite_end: {
+      type: DataTypes.DATEONLY,
+      allowNull: true
+    },
     lite_price: {
       type: DataTypes.INTEGER,
       allowNull: true,

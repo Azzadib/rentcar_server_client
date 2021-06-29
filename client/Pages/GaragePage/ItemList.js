@@ -140,11 +140,11 @@ export default function ItemList() {
   }
 
   return (
-    <div className="bg-gray-200 h-100v">
+    <div className="bg-gray-200 min-h-screen">
       <div className="absolute text-white mt-28 w-screen z-30">
         <div className={checkouterror ? 'bg-red-600 max-w-sm mx-auto py-3 px-3 rounded-full text-center' : ''}>{checkouterror}</div>
       </div>
-      <div className="relative py-16 mx-auto sm:max-w-xl md:max-w-full lg:max-w-screen-xl lg:py-20 px-12">
+      <div className="py-16 mx-auto sm:max-w-xl md:max-w-full lg:max-w-screen-xl lg:py-20 px-12">
         <div className="mx-auto py-10">
           <div className="text-2xl font-semibold mb-4 flex">My Garage</div>
           <div className="flex flex-wrap">

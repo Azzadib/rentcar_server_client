@@ -7,13 +7,15 @@ import {
     EDIT_LITE_REQUEST,
 } from '../Constants/LiteConstants'
 
-export const addLiteActions = (uid, carnum, days) => async (dispatch) => {
+export const addLiteActions = (uid, carnum, dates) => async (dispatch) => {
     dispatch({
         type: ADD_LITE_REQUEST
     })
     try {
-        const data = await axios.post(`/api/trans/tocart/${uid}/${carnum}`, days)
+        const data = await axios.post(`/api/trans/tocart/${uid}/${carnum}`, dates)
+        console.log('called1')
         dispatch({ type: ADD_LITE_SUCCESS, payload: data })
+        console.log('called2')
         return { data }
     } catch (error) {
         dispatch({ type: ADD_LITE_FAIL, payload: error.response })

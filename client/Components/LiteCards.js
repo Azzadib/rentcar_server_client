@@ -7,6 +7,8 @@ import deleteIcon from '../assets/svg/delete-icon.svg'
 import { useDispatch, useSelector } from 'react-redux'
 import { deleteLiteActions, editLiteActions } from '../Redux/Actions/LiteActions'
 import { cartListActions } from '../Redux/Actions/CartActions'
+import DatePicker from 'react-datepicker'
+import { addDays, addMonths, formatDistanceStrict, parseISO } from 'date-fns'
 
 export default function LiteCards(props) {
   const { item } = props
@@ -18,6 +20,8 @@ export default function LiteCards(props) {
   const [changes, setChanges] = useState(false)
   const [updated, setUpdated] = useState(false)
   const [car, setCar] = useState()
+  const [startDate, setStart] = useState(new Date())
+  const [endDate, setEnd] = useState(new Date())
   const [days, setDays] = useState(0)
   const dispatch = useDispatch()
   const userinfo = useSelector(state => state.login)
@@ -26,11 +30,21 @@ export default function LiteCards(props) {
     if (item) {
       setLite(item)
       setDays(item.lite_days)
+      setStart(parseISO(item.lite_start))
+      setEnd(parseISO(item.lite_end))
     }
   }, [])
 
   useEffect(() => {
-    console.log('reload car')
+    startDate.setHours(0, 0, 0, 0)
+    endDate.setHours(0, 0, 0, 0)
+    if (endDate < startDate) setEnd(startDate)
+    const newDays = parseInt(formatDistanceStrict(startDate, addDays(endDate, 1)).split(' ')[0])
+    setDays(newDays)
+    setChanges(true)
+  }, [startDate, endDate])
+
+  useEffect(() => {
     Car.getCar(item.lite_car_id).then((cardata) => {
       setCar(cardata)
     }).catch(err => {
@@ -39,9 +53,11 @@ export default function LiteCards(props) {
   }, [])
 
   const editItem = () => {
-    dispatch(editLiteActions(lite.lite_id, { lite_days: days })).then((result) => {
+    dispatch(editLiteActions(lite.lite_id, { lite_start: startDate, lite_end: endDate })).then((result) => {
+      console.log('result', result)
       if (result.data.status === 201) {
         dispatch(cartListActions(userinfo.user.user_id)).then((res) => {
+          console.log('result', res)
           item.lite_days = days
           setUpdated(true)
           setTimeout(() => { setUpdated(false) }, 1000)
@@ -62,7 +78,7 @@ export default function LiteCards(props) {
 
   return (
     <div className="flex gap-3 bg-white mb-3 w-2/3 shadow-lg rounded-r-xl border-b-2 border-r-2 border-red-500">
-      <div className={`${updated? 'absolute' : 'hidden'} z-20`}>
+      <div className={`${updated ? 'absolute' : 'hidden'} z-20`}>
         <div class="flex w-full ml-32 mt-8 max-w-sm overflow-hidde bg-white rounded-lg shadow-md dark:bg-gray-800">
           <div class="flex items-center justify-center w-12 bg-green-500">
             <svg class="w-6 h-6 text-white fill-current" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
@@ -83,33 +99,38 @@ export default function LiteCards(props) {
       <img img src={car ? `http://localhost:3000/api/caim/cardata/${car.car_number}/${car.car_images.map((image) => { if (image.caim_primary === true) return image.caim_filename }).join('')}` : ''}
         onError={(e) => { e.target.onerror = null; e.target.src = "https://genesisairway.com/wp-content/uploads/2019/05/no-image.jpg" }}
         className="w-28 h-20v object-cover overflow-hidden" />
-      <div className="ml-2 mt-2 mr-5 w-48">
+      <div className="ml-2 mt-2 mr-5 w-40">
         <div className="text-blue-700 font-medium">{car ? car.car_manufacturer : ''} {car ? car.car_model : ''}</div>
-        <div className="flex mt-4">
-          <div className={days > 2 ? 'mr-3 mt-1 text-gray-700' : 'hidden'}><del>Rp{changes ? (days * car.car_price).toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.') : lite.lite_price.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.')}</del></div>
-          <div className="text-lg font-bold">Rp{changes ? days > 2 ? (days * car.car_price * 0.85).toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.') : (days * car.car_price).toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.') : (lite.lite_price - lite.lite_discount).toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.')}</div>
+        <div className="mt-4">
+          <div className={days > 2 ? 'mr-3 mt-1 text-gray-700' : 'hidden'}><del>Rp{changes && car ? (days * car.car_price).toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.') : lite.lite_price.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.')}</del></div>
+          <div className="text-lg font-bold">Rp{changes && car ? days > 2 ? (days * car.car_price * 0.85).toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.') : (days * car.car_price).toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.') : (lite.lite_price - lite.lite_discount).toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.')}</div>
         </div>
+      </div>
+      <div className="my-auto mr-3">
+        <img src={deleteIcon} className="w-7 hover:cursor-pointer my-auto" onClick={deleteItem} />
       </div>
       <div className="my-auto">
         <div className="flex my-auto">
-          <div className="my-auto mr-3">
-            <img src={deleteIcon} className="w-7 hover:cursor-pointer" onClick={deleteItem} />
-          </div>
-          <div onClick={() => { if (days > 1) { setDays(days - 1); setChanges(true) } }}
-            className={`${days > 1 ? 'bg-red-500' : 'bg-gray-300'} rounded-full text-white font-extrabold text-2xl px-3`}>
-            <img src={minus} className="w-4 py-3 my-auto" />
-          </div>
-          <input type="text" value={days} pattern="[0-9]*"
-            className="border-none focus:ring-0 w-12 text-center"
+          <DatePicker
+            className="h-5v w-28 bg-blue-500 text-white my-auto"
+            selected={startDate}
+            onChange={(date) => setStart(date)}
+            minDate={addDays(new Date(), 1)}
+            maxDate={addMonths(new Date(), 1)}
+            showDisabledMonthNavigation
           />
-          <div onClick={() => { if (days < 14) { setDays(days + 1); setChanges(true) } }}
-            className={`${days <= 13 ? 'bg-blue-500' : 'bg-gray-300'} rounded-full text-white font-extrabold text-2xl px-3`}>
-            <img src={plus} className="w-4 py-3 my-auto" />
-          </div>
-          <div className="ml-3 my-auto text-lg">day<span className={days > 3 ? '' : 'hidden'}>s</span></div>
+          <div className="mx-1">to</div>
+          <DatePicker
+            className="h-5v w-28 bg-red-500 text-white"
+            selected={endDate}
+            onChange={(date) => setEnd(date)}
+            minDate={startDate}
+            maxDate={addDays(startDate, 13)}
+            showDisabledMonthNavigation
+          />
         </div>
         <button onClick={editItem}
-          className={days == item.lite_days ? 'hidden' : 'bg-red-500 ml-10 border-2 mt-3 rounded-xl px-3 py-1 text-white focus:outline-none'}
+          className={`${days == item.lite_days ? 'bg-gray-500 hover:cursor-not-allowed' : 'bg-green-500'} ml-10 border-2 mt-3 rounded-xl px-3 py-1 text-white focus:outline-none`}
         >
           Save changes.
         </button>

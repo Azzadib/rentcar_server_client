@@ -12,7 +12,7 @@ import { cartListActions } from '../../Redux/Actions/CartActions'
 import { Link } from 'react-router-dom'
 import noImg from '../../assets/images/no-image.jpg'
 import DatePicker from 'react-datepicker'
-import { addDays, addMonths } from 'date-fns'
+import { addDays, addMonths, formatDistanceStrict, parseISO } from 'date-fns'
 
 export default function CarDetail() {
   const { id } = useParams()
@@ -26,8 +26,8 @@ export default function CarDetail() {
   const [isAdmin, setIsAdmin] = useState(false)
   const [days, setDays] = useState(1)
 
-  const [startDate, setStartDate] = useState(new Date());
-  const [endDate, setEndDate] = useState()
+  const [startDate, setStartDate] = useState(addDays(new Date(), 1));
+  const [endDate, setEndDate] = useState(addDays(new Date(), 1))
 
   const dispatch = useDispatch()
   useEffect(() => {
@@ -75,14 +75,26 @@ export default function CarDetail() {
     }
   }, [car])
 
+  useEffect(() => {
+    startDate.setHours(0, 0, 0, 0)
+    endDate.setHours(0, 0, 0, 0)
+    if (endDate < startDate) setEndDate(startDate)
+    const newDays = parseInt(formatDistanceStrict(startDate, addDays(endDate, 1)).split(' ')[0])
+    setDays(newDays)
+  }, [startDate, endDate])
+
   const addToGarae = (action) => {
     const uid = userdetail.user_id
     const carnum = car.car_number
-    const lite_days = { lite_days: days }
+    const lite_days = {
+      lite_days: days,
+      lite_start: startDate,
+      lite_end: endDate
+    }
     dispatch(addLiteActions(uid, carnum, lite_days)).then((res) => {
       if (res.data.status === 201) {
         dispatch(cartListActions(uid)).then((result) => {
-          if (result.data.status === 200) action === 'checkout' ? window.location = '/garage' : window.location.reload()
+          //if (result.data.status === 200) action === 'checkout' ? window.location = '/garage' : window.location.reload()
         })
       }
       else {
@@ -183,25 +195,6 @@ export default function CarDetail() {
                   </button>
                 </Link>
               </div>
-              {/* <DatePicker
-                className="h-5v w-28 bg-red-200"
-                selected={startDate}
-                onChange={(date) => setStartDate(date)}
-                minDate={new Date()}
-                maxDate={addMonths(new Date(), 1)}
-                showDisabledMonthNavigation
-              />
-              <DatePicker
-                className="h-5v w-28 bg-red-200 ml-5"
-                selected={endDate}
-                onChange={(date) => setEndDate(date)}
-                minDate={startDate}
-                maxDate={addDays(startDate, 14)}
-                showDisabledMonthNavigation
-              />
-              <button className="ml-5" onClick={checkDate} >check</button>
-              <div className="mx-3">{startDate? startDate.toString() : ''}</div>
-              <div>{endDate? endDate.toString() : ''}</div> */}
               <div className="flex mb-3">
                 <div>{loading ? 0 : car.car_comments.length}</div>
                 <div className="ml-2 mr-4">reviews</div>
@@ -219,26 +212,37 @@ export default function CarDetail() {
                 {ondesc ? details() : reviews()}
               </div>
             </div>
-            <div className='fixed right-16 bg-white ml-10 backdrop-filter w-72 h-64v backdrop-blur-sm bg-opacity-10 rounded-3xl p-2 shadow-lg'>
+            <div className='fixed right-16 bg-white ml-10 backdrop-filter w-72 h-72v backdrop-blur-sm bg-opacity-10 rounded-3xl p-2 shadow-lg'>
               <div className="text-center text-black text-lg mb-3">Add this car to your garage</div>
               <div className="border-red-500 border-b-4"></div>
-              <div className="flex mt-5">
-                <div onClick={() => { if (days > 1) setDays(days - 1) }}
-                  className={`${days > 1 ? 'bg-red-500' : 'bg-gray-300'} rounded-full text-white font-extrabold text-2xl px-3`}>
-                  <img src={minus} className="w-4 py-3 my-auto" />
-                </div>
-                <div className="my-auto px-5 text-xl font-medium">{days}</div>
-                <div onClick={() => { if (days < 14) setDays(days + 1) }}
-                  className={`${days <= 13 ? 'bg-blue-500' : 'bg-gray-300'} rounded-full text-white font-extrabold text-2xl px-3`}>
-                  <img src={plus} className="w-4 py-3 my-auto" />
-                </div>
-                <div className="my-auto ml-3">day<span className={days > 1 ? '' : 'hidden'}>s</span></div>
+              <div className="mt-1 ml-2">Duration: {formatDistanceStrict(startDate, addDays(endDate, 1))}</div>
+              <div className="mt-2 flex">
+                <div className=" ml-2 my-auto">From:</div>
+                <DatePicker
+                  className="h-5v w-28 ml-6 bg-blue-500 text-white my-auto"
+                  selected={startDate}
+                  onChange={(date) => setStartDate(date)}
+                  minDate={new Date()}
+                  maxDate={addMonths(new Date(), 1)}
+                  showDisabledMonthNavigation
+                />
               </div>
-              <div className="text-gray-500 mt-3 ml-2 mb-5">No more than 14 days.</div>
-              <div className={`${days > 2 ? 'text-gray-500' : 'hidden'} text-right text-lg mr-4 font-medium`}>RP<del>{loading ? 0 : (car.car_price * days).toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.')}</del></div>
+              <div className="ml-2 mt-2 flex">
+                <div className="my-auto">Until:</div>
+                <DatePicker
+                  className="h-5v w-28 bg-red-500 text-white ml-7"
+                  selected={endDate}
+                  onChange={(date) => setEndDate(date)}
+                  minDate={startDate}
+                  maxDate={addDays(startDate, 13)}
+                  showDisabledMonthNavigation
+                />
+              </div>
+              <div className="text-gray-500 mt-3 ml-2 mb-5">Maximum: 14 days.</div>
+              <div className={`${days > 2 ? 'text-gray-500' : 'hidden'} text-lg ml-32 font-medium`}>RP<del>{loading ? 0 : (car.car_price * days).toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.')}</del></div>
               <div className="flex">
                 <div className="text-gray-600">Subtotal</div>
-                <div className="ml-20 text-xl font-bold">Rp{loading ? 0 : (days > 2 ? car.car_price * days * 0.85 : car.car_price * days).toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.')}</div>
+                <div className="ml-16 text-xl font-bold">Rp{loading ? 0 : (days > 2 ? car.car_price * days * 0.85 : car.car_price * days).toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.')}</div>
               </div>
               <div className={`${days > 2 ? 'hidden' : ''} text-sm text-gray-500`}>Get 15% discount for each car ordered more than 2 days.</div>
               <div className={`${days > 2 ? 'mt-7' : 'mt-4'} font-bold text-lg text-center`}>
