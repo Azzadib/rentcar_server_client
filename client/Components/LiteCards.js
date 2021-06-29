@@ -43,10 +43,8 @@ export default function LiteCards(props) {
       if (result.data.status === 201) {
         dispatch(cartListActions(userinfo.user.user_id)).then((res) => {
           item.lite_days = days
-          setChanges(false)
-
           setUpdated(true)
-          setTimeout(() => { setUpdated(false) }, 2000)
+          setTimeout(() => { setUpdated(false) }, 1000)
         })
       }
     })
@@ -64,7 +62,7 @@ export default function LiteCards(props) {
 
   return (
     <div className="flex gap-3 bg-white mb-3 w-2/3 shadow-lg rounded-r-xl border-b-2 border-r-2 border-red-500">
-      <div className={`${updated? 'absolute w-screen' : 'hidden'} z-20`}>
+      <div className={`${updated? 'absolute' : 'hidden'} z-20`}>
         <div class="flex w-full ml-32 mt-8 max-w-sm overflow-hidde bg-white rounded-lg shadow-md dark:bg-gray-800">
           <div class="flex items-center justify-center w-12 bg-green-500">
             <svg class="w-6 h-6 text-white fill-current" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">

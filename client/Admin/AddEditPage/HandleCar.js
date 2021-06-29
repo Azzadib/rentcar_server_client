@@ -10,7 +10,6 @@ import { createImageActions, deleteImageActions } from '../../Redux/Actions/CarI
 
 export default function HandleCar() {
   const { carid } = useParams()
-  const [images, setImages] = useState([])
   const [saving, setSaving] = useState(false)
 
   const [openDialog, setOpenDialog] = useState(false)
@@ -18,7 +17,6 @@ export default function HandleCar() {
   const [onMainImg, setOnMainImg] = useState(false)
   const [slctImgId, setSlctImgId] = useState()
   const [slctImgIdx, setSlctImgIdx] = useState()
-  const [slctImgName, setSlctImgName] = useState()
 
   const [imgAdded, setImgAdded] = useState(false)
 
@@ -161,8 +159,9 @@ export default function HandleCar() {
           })
         }
         else {
-          const a = secImg
-          const b = a.splice(slctImgIdx, 1)
+          /* const a = secImg
+          const b = a.splice(slctImgIdx, 1) */
+          const a = secImg.splice(slctImgIdx, 1)
           setSecImg(a)
         }
       }
