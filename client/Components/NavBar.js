@@ -119,7 +119,7 @@ export default function NavBar() {
                     </Menu.Item>
                     <Menu.Item>
                       {({ active }) => (
-                        <button onClick={()=>{console.log('profile', profile); console.log('avatar', profile.user_avatar)}}
+                        <button onClick={()=> window.location = "/profile"}
                           className={`${active ? 'bg-purple-800 text-white' : ' text-purple-800'} font-semibold group flex rounded-xl items-center w-full px-2 py-2 text-sm focus:outline-none`}
                         >
                           My Profile

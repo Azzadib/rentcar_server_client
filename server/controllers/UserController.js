@@ -6,6 +6,8 @@ import config from '../../config/config'
 
 import fs from 'fs'
 import path from 'path'
+import { sequelize } from '../../config/config-db'
+import { parseISO } from 'date-fns'
 
 const photoDir = process.cwd() + '/images'
 
@@ -100,7 +102,7 @@ const existsEmail = async (req, res, next) => {
 
 const signUp = async (req, res) => {
     try {
-        const { user_name, user_email, user_password, user_birthdate, user_gender } = req.body
+        const { user_name, user_email, user_password } = req.body
 
         if (req.existsemail) return res.status(400).send({ message: 'Email is already exists.' })
 
@@ -111,11 +113,6 @@ const signUp = async (req, res) => {
         if (!user_password) return res.status(400).send({ message: 'Password can\'t be blank.' })
         const passwordFormat = /^.*(?=.{8,})(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%&]).*$/
         if (!user_password.match(passwordFormat)) return res.status(400).send({ message: 'Password should be at least 8 characters of uppercase, lowercase, and special character.' })
-
-        if (user_birthdate !== undefined) {
-            const dateFormat = /^\d{4}([./-])\d{2}\1\d{2}$/
-            if (!user_birthdate.match(dateFormat)) return res.status(400).send({ message: 'Birthdate format should be yyyy/mm/dd , yyyy-mm-dd or yyyy.mm.dd' })
-        }
 
         const user_type = user_email.split('@')[1].toLowerCase() === 'admin.rentcar.id' ? 'Admin' : 'User'
 
@@ -128,8 +125,6 @@ const signUp = async (req, res) => {
                 user_email: user_email,
                 user_password: hashPassword,
                 user_salt: salt,
-                user_birthdate: user_birthdate,
-                user_gender: user_gender,
                 user_type: user_type,
             }
         )
@@ -227,10 +222,11 @@ const updateUser = async (req, res) => {
             user_password = AuthHelper.hashPassword(user_password, salt)
         }
 
-        if (user_birthdate !== undefined) {
+        if (user_birthdate) {
             birthdateIncluded = true
+            user_birthdate = user_birthdate.split('T')[0]
             const dateFormat = /^\d{4}([./-])\d{2}\1\d{2}$/
-            if (!user_birthdate.match(dateFormat)) return res.status(400).send({ message: 'New birthdate format should be yyyy/mm/dd , yyyy-mm-dd or yyyy.mm.dd' })
+            if (!user_birthdate.match(dateFormat)) return res.status(400).send({ message: `New birthdate format should be yyyy/mm/dd , yyyy-mm-dd or yyyy.mm.dd. Found ${user_birthdate}` })
         }
 
         if (!birthdateIncluded) user_birthdate = oldUser.user_birthdate ? oldUser.user_birthdate : null
@@ -370,6 +366,43 @@ const countUser = async (req, res) => {
     }
 }
 
+const sucOrd = async (req, res) => {
+    try {
+        const user = req.existsuser
+        if (!user) return res.status(404).send({ message: 'User not found c.' })
+
+        const totalsuccess = await sequelize.query(
+            "select count(order_name) as total_success_order, sum(order_total_days) as total_days, sum(order_total_due) as total_spent from orders where (order_user_id = :userid) and order_status in ('rent', 'closed')",
+            {
+                replacements: { userid: parseInt(user.user_id) },
+                type: sequelize.QueryTypes.SELECT
+            }
+        )
+        return res.status(200).send(totalsuccess[0])
+    } catch (error) {
+       return res.status(500).send({ message: `User success order: ${error}.`})
+    }
+}
+
+const changePassword = async (req, res, next) => {
+    try {
+        const user = req.existsuser
+        if (!user) return res.status(404).send({ message: 'User not found.' })
+
+        const { old_password, user_password } = req.body
+
+        if (!old_password) return res.status(400).send({ message: 'Old password can\'t be blank.' })
+        if (!user_password) return res.status(400).send({ message: 'New password can\'t be blank.' })
+
+        if (!AuthHelper.authenticate(old_password, user.user_password, user.user_salt)) {
+            return res.status(400).send({ message: "Please enter correct old password." })
+        }
+        next()
+    } catch (error) {
+        return res.status(500).send({ message: `Change password: ${error}.`})
+    }
+}
+
 export default {
     findAllUsers,
     findOneUser,
@@ -384,5 +417,7 @@ export default {
     signOut,
     requireLogin,
     isAuthorized,
-    countUser
+    countUser,
+    sucOrd,
+    changePassword,
 }

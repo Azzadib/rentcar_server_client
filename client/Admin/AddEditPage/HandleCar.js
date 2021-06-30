@@ -128,7 +128,6 @@ export default function HandleCar() {
     else {
       const files = Object.values(event.target.files)
       files.map((file) => {
-        console.log(`name`, file.name)
         setSecImg(secImg => [...secImg, {
           id: undefined,
           name: file.name,

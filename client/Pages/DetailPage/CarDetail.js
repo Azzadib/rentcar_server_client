@@ -5,8 +5,6 @@ import star from '../../assets/svg/star.svg'
 import { carDetailActions } from '../../Redux/Actions/CarActions'
 import { scrollActions } from '../../Redux/Actions/ScrollActions'
 import Caim from '../../SericeApis/Caim'
-import minus from '../../assets/svg/minus.svg'
-import plus from '../../assets/svg/plus.svg'
 import { addLiteActions } from '../../Redux/Actions/LiteActions'
 import { cartListActions } from '../../Redux/Actions/CartActions'
 import { Link } from 'react-router-dom'
@@ -94,7 +92,7 @@ export default function CarDetail() {
     dispatch(addLiteActions(uid, carnum, lite_days)).then((res) => {
       if (res.data.status === 201) {
         dispatch(cartListActions(uid)).then((result) => {
-          //if (result.data.status === 200) action === 'checkout' ? window.location = '/garage' : window.location.reload()
+          if (result.data.status === 200) action === 'checkout' ? window.location = '/garage' : window.location.reload()
         })
       }
       else {
@@ -147,14 +145,6 @@ export default function CarDetail() {
       }
     </div>
   )
-
-  const checkDate = () => {
-    const oneDay = 24 * 60 * 60 * 1000
-    const days = Math.round(Math.abs((startDate - endDate) / oneDay)) + 1
-    console.log('start:', startDate)
-    console.log('end:', endDate)
-    console.log('days:', days)
-  }
 
   return (
     <div className="bg-gray-200">
@@ -222,7 +212,7 @@ export default function CarDetail() {
                   className="h-5v w-28 ml-6 bg-blue-500 text-white my-auto"
                   selected={startDate}
                   onChange={(date) => setStartDate(date)}
-                  minDate={new Date()}
+                  minDate={addDays(new Date(), 1)}
                   maxDate={addMonths(new Date(), 1)}
                   showDisabledMonthNavigation
                 />
@@ -234,6 +224,7 @@ export default function CarDetail() {
                   selected={endDate}
                   onChange={(date) => setEndDate(date)}
                   minDate={startDate}
+                  highlightDates={[startDate]}
                   maxDate={addDays(startDate, 13)}
                   showDisabledMonthNavigation
                 />

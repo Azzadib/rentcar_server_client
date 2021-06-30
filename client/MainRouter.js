@@ -10,6 +10,7 @@ import GaragePage from './Pages/GaragePage/GaragePage'
 import InvoicePage from './Pages/InvoicePage/InvoicePage'
 import LandingPage from './Pages/LandingPage/LandingPage'
 import OrderListPage from './Pages/OrderListPage/OrderListPage'
+import ProfilePage from './Pages/ProfilePage/ProfilePage'
 import LoginPage from './Pages/UserPage/LoginPage'
 import SignupPage from './Pages/UserPage/SignupPage'
 
@@ -22,6 +23,7 @@ const MainRouter = () => {
         <Route path="/" exact component={LandingPage}/>
         <Route path="/view/:type" exact component={CarByTypePage}/>
         <Route path="/detail/:id" exact component={DetailPage}/>
+        <PrivateRoute path="/profile" exact component={ProfilePage}/>
         <PrivateRoute path="/garage" exact component={GaragePage}/>
         <PrivateRoute path="/myorder" exact component={OrderListPage}/>
         <PrivateRoute path="/order/result" exact component={InvoicePage}/>

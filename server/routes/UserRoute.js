@@ -6,14 +6,18 @@ const router = Router()
 router.get('/alluser', IndexController.UserController.findAllUsers)
 router.get('/:id', IndexController.UserController.findOneUser)
 router.post('/signup', IndexController.UserController.existsEmail, IndexController.UserController.signUp)
-router.post('/login', IndexController.UserController.existsEmail, IndexController.UserController.login)
-router.put('/:id', IndexController.UserController.existsUser, IndexController.UserController.existsEmail, IndexController.UserController.updateUser)
+router.post('/login',IndexController.UserController.existsEmail, IndexController.UserController.login)
+router.put('/:id',
+    IndexController.UserController.existsUser, IndexController.UserController.existsEmail, IndexController.UserController.updateUser)
 router.put('/:id/:folder', IndexController.UserController.existsUser, IndexController.UploadController.fileUpload,
     IndexController.UserController.userAvatar)
 router.delete('/:id', IndexController.UserController.existsUser, IndexController.UserController.deleteUser)
 router.delete('/:avatar/:id', IndexController.UserController.existsUser, IndexController.UserController.deleteUserAvatar)
 router.get('/signout', IndexController.UserController.signOut)
 router.get('/admin/usercount', IndexController.UserController.countUser)
+router.get('/myorder/succorder/:id', IndexController.UserController.existsUser, IndexController.UserController.sucOrd)
+router.put('/profile/chpsswd/:id',
+    IndexController.UserController.existsUser, IndexController.UserController.changePassword, IndexController.UserController.updateUser)
 
 //* Download avatar
 router.get('/:folder/:subfol/:filename', IndexController.DownloadController.download)

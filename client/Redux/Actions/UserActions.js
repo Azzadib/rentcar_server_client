@@ -4,6 +4,12 @@ import {
     ALL_USER_REQUEST,
     ALL_USER_SUCCESS,
     DELETE_USER_REQUEST,
+    UPDATE_AVATAR_FAIL,
+    UPDATE_AVATAR_REQUEST,
+    UPDATE_AVATAR_SUCCESS,
+    UPDATE_USER_FAIL,
+    UPDATE_USER_REQUEST,
+    UPDATE_USER_SUCCESS,
     USER_LOGIN_FAIL,
     USER_LOGIN_REQUEST,
     USER_LOGIN_SUCCESS,
@@ -11,6 +17,9 @@ import {
     USER_SIGNUP_FAIL,
     USER_SIGNUP_REQUEST,
     USER_SIGNUP_SUCCESS,
+    USER_SPENT_FAIL,
+    USER_SPENT_REQUEST,
+    USER_SPENT_SUCCES,
 } from '../Constants/UserConstants'
 
 export const signupActions = (user) => async (dispatch) => {
@@ -72,5 +81,47 @@ export const deleteUserActions = (uid) => async (dispatch) => {
         return { data }
     } catch(error) {
         return { data: error.response }
+    }
+}
+
+export const userSpentActions = (uid) => async (dispatch) => {
+    dispatch({
+        type: USER_SPENT_REQUEST
+    })
+    try {
+        const data = await axios.get(`/api/user/myorder/succorder/${uid}`)
+        dispatch({ type: USER_SPENT_SUCCES })
+        return { data }
+    } catch (error) {
+        dispatch({ type: USER_SPENT_FAIL })
+        return { data: error.response }
+    }
+}
+
+export const userUpdateActions = (uid, userdata) => async (dispatch) => {
+    dispatch({
+        type: UPDATE_USER_REQUEST
+    })
+    try {
+        const data = await axios.put(`/api/user/${uid}`, userdata)
+        dispatch({ type: UPDATE_USER_SUCCESS })
+        return { data }
+    } catch (error) {
+        dispatch({ type: UPDATE_USER_FAIL })
+        return { data: error.response }
+    }
+}
+
+export const updateAvatarActions = (uid, avatar) => async (dispatch) => {
+    dispatch({
+        type: UPDATE_AVATAR_REQUEST
+    })
+    try {
+        const data = await axios.put(`/api/user/${uid}/avatar`, avatar)
+        dispatch({ type: UPDATE_AVATAR_SUCCESS })
+        return { data }
+    } catch (error) {
+        dispatch({ type: UPDATE_AVATAR_FAIL })
+        return { data: error.response}
     }
 }
