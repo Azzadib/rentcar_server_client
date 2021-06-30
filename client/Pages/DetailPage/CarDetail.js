@@ -237,12 +237,12 @@ export default function CarDetail() {
               </div>
               <div className={`${days > 2 ? 'hidden' : ''} text-sm text-gray-500`}>Get 15% discount for each car ordered more than 2 days.</div>
               <div className={`${days > 2 ? 'mt-7' : 'mt-4'} font-bold text-lg text-center`}>
-                <button onClick={() => { logedin ? addToGarae('add') : setAsktologin(true) }}
-                  className="bg-red-500 rounded-xl px-3 py-2 w-64 text-white focus:outline-none active:bg-red-700">
+                <button onClick={() => { logedin ? car.car_user_id? '' : addToGarae('add') : setAsktologin(true) }}
+                  className={`${car? ((car.car_user_id !== null) && logedin)? 'hover:cursor-not-allowed' : '' : ''} bg-red-500 rounded-xl px-3 py-2 w-64 text-white focus:outline-none active:bg-red-700`}>
                   {asktologin ? 'Login First.' : 'Add to Garage'}
                 </button>
-                <button onClick={() => { logedin ? addToGarae('checkout') : setAsktologin(true) }}
-                  className="bg-white border-red-500 border-2 mt-3 rounded-xl px-3 py-2 w-64 text-red-500 focus:outline-none">
+                <button onClick={() => { logedin ? car.car_user_id? '' : addToGarae('checkout') : setAsktologin(true) }}
+                  className={`${car? ((car.car_user_id !== null) && logedin)? 'hover:cursor-not-allowed' : '' : ''} bg-white border-red-500 border-2 mt-3 rounded-xl px-3 py-2 w-64 text-red-500 focus:outline-none `}>
                   {asktologin ? 'Login First.' : 'Checkout now.'}
                 </button>
               </div>

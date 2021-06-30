@@ -92,6 +92,7 @@ export default function ItemList() {
         order_address: orderdata.order_address,
         order_phone: orderdata.order_phone
       }
+      console.log('ph1', orderdata.order_phone)
       dispatch(cartCheckoutActions(cartid, senddata)).then((result) => {
         console.log(result.data)
         if (result.data.status === 201) {

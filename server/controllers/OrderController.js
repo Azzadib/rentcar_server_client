@@ -16,7 +16,7 @@ const createOrder = async (req, res, next) => {
         const order_tax = parseInt(0.1 * beforeTax)
         const afterTax = parseInt(beforeTax + order_tax)
         const { order_city, order_address, order_phone } = req.body
-
+console.log('ph2', order_phone)
         const order = await req.context.models.Order.create(
             {
                 order_discount: total_discount,

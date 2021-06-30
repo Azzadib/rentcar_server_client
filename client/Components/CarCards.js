@@ -21,7 +21,7 @@ export default function Carcards(props) {
       const { user } = userdata
       if (user) setLogedin(true)
       setUserdetail(user)
-      if (car.car_user_id && car.car_user_id !== user.user_id) setNotavailable(true)
+      if (car.car_user_id !== null) setNotavailable(true)
     }
   }, [dispatch])
 

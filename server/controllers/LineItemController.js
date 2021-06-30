@@ -235,6 +235,8 @@ const editLiteID = async (req, res) => {
         const newLite = await req.context.models.LineItem.update(
             {
                 lite_days: lite_days,
+                lite_start: lite_start,
+                lite_end: lite_end,
                 lite_price: lite_price,
                 lite_discount: lite_discount
             },

@@ -13,6 +13,7 @@ import { addDays, addMonths, formatDistanceStrict, parseISO } from 'date-fns'
 export default function LiteCards(props) {
   const { item } = props
   const [lite, setLite] = useState({
+    lite_user_id: '',
     lite_price: 0,
     lite_discount: 0,
     lite_days: 0,
@@ -101,8 +102,9 @@ export default function LiteCards(props) {
         className="w-28 h-20v object-cover overflow-hidden" />
       <div className="ml-2 mt-2 mr-5 w-40">
         <div className="text-blue-700 font-medium">{car ? car.car_manufacturer : ''} {car ? car.car_model : ''}</div>
-        <div className="mt-4">
-          <div className={days > 2 ? 'mr-3 mt-1 text-gray-700' : 'hidden'}><del>Rp{changes && car ? (days * car.car_price).toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.') : lite.lite_price.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.')}</del></div>
+        <div className="mt-1">
+          <div className={car? car.car_user_id !== null ? '' : 'hidden' : 'hidden' }>Not available</div>
+          <div className={days > 2 ? 'mr-3 mt-3 text-gray-700' : 'hidden'}><del>Rp{changes && car ? (days * car.car_price).toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.') : lite.lite_price.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.')}</del></div>
           <div className="text-lg font-bold">Rp{changes && car ? days > 2 ? (days * car.car_price * 0.85).toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.') : (days * car.car_price).toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.') : (lite.lite_price - lite.lite_discount).toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.')}</div>
         </div>
       </div>

@@ -1,4 +1,4 @@
-import { Disclosure } from '@headlessui/react'
+import { Dialog, Disclosure, Transition } from '@headlessui/react'
 import React, { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useHistory } from 'react-router-dom'
@@ -11,6 +11,26 @@ import doneicon from '../../assets/svg/done.svg'
 import activeicon from '../../assets/svg/active.svg'
 import { allOrderActions, updateOrderActions } from '../../Redux/Actions/OrderActions'
 import Order from '../../SericeApis/Order'
+import { Fragment } from 'react'
+import { makeStyles } from '@material-ui/core/styles';
+import Rating from '@material-ui/lab/Rating';
+import { Box } from '@material-ui/core'
+
+const labels = {
+  1: 'Useless',
+  2: 'Poor',
+  3: 'OK',
+  4: 'Good',
+  5: 'Excellent',
+}
+
+const useStyles = makeStyles({
+  root: {
+    width: 200,
+    display: 'flex',
+    alignItems: 'center',
+  },
+})
 
 export default function OrderList() {
   const dispatch = useDispatch()
@@ -60,7 +80,7 @@ export default function OrderList() {
     if (pymntres.payt_trx_number) {
       dispatch(updateOrderActions('paid', pymntres.payt_order_number, { 'pyt_num': pymntres.payt_trx_number })).then((result) => {
         if (result.data.status === 201) {
-          dispatch(allOrderActions(result.data.data.order_user_id)).then((res)=> {
+          dispatch(allOrderActions(result.data.data.order_user_id)).then((res) => {
             if (res.data.status == 200) history.push({
               pathname: '/order/result',
               data: { order: slctd }
@@ -77,18 +97,46 @@ export default function OrderList() {
     if (toCncl.order_pay_trx_number) {
       const data = { payt_trx_number_ref: toCncl.order_pay_trx_number }
       Order.refund(data).then((r) => {
-      console.log('cancel:', r)
-    })
+        console.log('cancel:', r)
+      })
     }
     dispatch(updateOrderActions('cancelled', toCncl.order_name)).then((result) => {
       if (result.data.status === 201) {
-        dispatch(allOrderActions(result.data.data.order_user_id)).then((res)=> {
+        dispatch(allOrderActions(result.data.data.order_user_id)).then((res) => {
           if (res.data.status == 200) window.location.reload()
           else console.log(res.data)
         })
       }
       else console.log(`error ${result.data.status}`, result)
     })
+  }
+
+  const updateOrder = (toUpd, stat) => {
+    dispatch(updateOrderActions(stat, toUpd.order_name)).then((result) => {
+      if (result.data.status === 201) {
+        dispatch(allOrderActions(result.data.data.order_user_id)).then((res) => {
+          if (res.data.status == 200) window.location.reload()
+          else console.log(res.data)
+        })
+      }
+      else console.log(`error ${result.data.status}`, result)
+    })
+  }
+
+  const [feedback, setFeedback] = useState(false)
+  const [rating, setRating] = useState(5)
+  const [review, setReview] = useState('')
+  const [hover, setHover] = React.useState(-1);
+  const classes = useStyles();
+
+  const writeReview = event => {
+    setReview(event.target.value)
+  }
+
+  const sendReview = () => {
+    setFeedback(false)
+    console.log('rat', rating)
+    console.log('rev', review)
   }
 
   return (
@@ -134,7 +182,7 @@ export default function OrderList() {
                                   </div>
                                   <div className="font-bold text-lg">Total Payment <span className="text-red-500">Rp{list.order_total_due.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.')}</span></div>
                                 </div>
-                                <button onClick={() => { if (window.confirm('Are you sure you wish to cancel this order?')) cancelOrder(list) } }
+                                <button onClick={() => { if (window.confirm('Are you sure you wish to cancel this order?')) cancelOrder(list) }}
                                   className="my-auto border-2 border-red-500 bg-red-500 px-6 py-2 rounded-full font-bold text-white shadow-lg focus:outline-none active:transform active:translate-y-1"
                                 >
                                   Cancel
@@ -175,7 +223,7 @@ export default function OrderList() {
                           comingsoon.length > 0 ?
                             comingsoon.map((list) => (
                               <div className="mt-2 bg-blue-100 px-2 py-2 rounded-xl shadow-md flex" key={list.order_number}>
-                                <img src={comingicon} className="w-16 ml-1 mr-5"/>
+                                <img src={comingicon} className="w-16 ml-1 mr-5" />
                                 <div>
                                   <div className="flex">
                                     <div>Order number {list.order_name}</div>
@@ -194,10 +242,15 @@ export default function OrderList() {
                                   </div>
                                   <div className="font-bold text-lg">Total Payment <span className="text-red-500">Rp{list.order_total_due.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.')}</span></div>
                                 </div>
-                                <button onClick={() => { if (window.confirm('Are you sure you wish to cancel this order?')) cancelOrder(list) } }
+                                <button onClick={() => { if (window.confirm('Are you sure you wish to cancel this order?')) cancelOrder(list) }}
                                   className="my-auto ml-20 border-2 border-red-500 bg-red-500 px-6 py-2 rounded-full font-bold text-white shadow-lg focus:outline-none active:transform active:translate-y-1"
                                 >
                                   Cancel
+                                </button>
+                                <button onClick={() => updateOrder(list, 'rent')}
+                                  className="my-auto ml-8 border-2 border-blue-500 bg-blue-500 px-6 py-2 rounded-full font-bold text-white shadow-lg focus:outline-none active:transform active:translate-y-1"
+                                >
+                                  Start
                                 </button>
                               </div>
                             ))
@@ -230,7 +283,7 @@ export default function OrderList() {
                           actvord.length > 0 ?
                             actvord.map((list) => (
                               <div className="mt-2 bg-blue-100 px-2 py-2 rounded-xl shadow-md flex" key={list.order_number}>
-                                <img src={activeicon} className="w-16 ml-1 mr-5"/>
+                                <img src={activeicon} className="w-16 ml-1 mr-5" />
                                 <div>
                                   <div className="flex">
                                     <div>Order number {list.order_name}</div>
@@ -249,6 +302,11 @@ export default function OrderList() {
                                   </div>
                                   <div className="font-bold text-lg">Total Payment <span className="text-red-500">Rp{list.order_total_due.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.')}</span></div>
                                 </div>
+                                <button onClick={() => updateOrder(list, 'closed')}
+                                  className="my-auto ml-10 border-2 border-blue-500 bg-blue-500 px-6 py-2 rounded-full font-bold text-white shadow-lg focus:outline-none active:transform active:translate-y-1"
+                                >
+                                  Start
+                                </button>
                               </div>
                             ))
                             :
@@ -280,7 +338,7 @@ export default function OrderList() {
                           finished.length > 0 ?
                             finished.map((list) => (
                               <div className="mt-2 bg-blue-100 px-2 py-2 rounded-xl shadow-md flex" key={list.order_number}>
-                                <img src={doneicon} className="w-16 ml-1 mr-5"/>
+                                <img src={doneicon} className="w-16 ml-1 mr-5" />
                                 <div>
                                   <div className="flex">
                                     <div>Order number {list.order_name}</div>
@@ -299,6 +357,11 @@ export default function OrderList() {
                                   </div>
                                   <div className="font-bold text-lg">Total Payment <span className="text-red-500">Rp{list.order_total_due.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.')}</span></div>
                                 </div>
+                                <button onClick={() => setFeedback(true)}
+                                  className="my-auto ml-10 border-2 border-green-500 bg-green-500 px-6 py-2 rounded-full font-bold text-white shadow-lg focus:outline-none active:transform active:translate-y-1"
+                                >
+                                  Feedback
+                                </button>
                               </div>
                             ))
                             :
@@ -330,7 +393,7 @@ export default function OrderList() {
                           cancelled.length > 0 ?
                             cancelled.map((list) => (
                               <div className="mt-2 bg-blue-100 px-2 py-2 rounded-xl shadow-md flex" key={list.order_number}>
-                                <img src={cancelicon} className="w-16 ml-1 mr-5"/>
+                                <img src={cancelicon} className="w-16 ml-1 mr-5" />
                                 <div>
                                   <div className="flex">
                                     <div>Order number {list.order_name}</div>
@@ -349,7 +412,7 @@ export default function OrderList() {
                                   </div>
                                   <div className="font-bold text-lg">Total Payment <span className="text-red-500">Rp{list.order_total_due.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.')}</span></div>
                                 </div>
-                                <div className="my-auto ml-8 font-semibold text-lg text-blue-500">{list.order_pay_trx_number? `Payment number: ${list.order_pay_trx_number}` : ''}</div>
+                                <div className="my-auto ml-8 font-semibold text-lg text-blue-500">{list.order_pay_trx_number ? `Payment number: ${list.order_pay_trx_number}` : ''}</div>
                               </div>
                             ))
                             :
@@ -363,6 +426,75 @@ export default function OrderList() {
           </div>
         </div>
       </div>
+      <Transition appear show={feedback} as={Fragment}>
+        <Dialog
+          as="div"
+          className="fixed inset-0 z-10 pb-10"
+          onClose={() => setFeedback(false)}
+          open={feedback}
+        >
+          <div className="px-4 text-center">
+            <Dialog.Overlay className="fixed inset-0 bg-black opacity-50" />
+            <span
+              className="inline-block align-middle"
+              aria-hidden="true"
+            >
+              &#8203;
+            </span>
+            <Transition.Child
+              as={Fragment}
+              enter="ease-out duration-300"
+              enterFrom="opacity-0 scale-95"
+              enterTo="opacity-100 scale-100"
+              leave="ease-in duration-200"
+              leaveFrom="opacity-100 scale-100"
+              leaveTo="opacity-0 scale-95"
+            >
+              <div className="inline-block w-full h-64v max-w-md p-6 my-8 overflow-hidden text-left align-middle transition-all transform bg-white shadow-xl rounded-2xl">
+                <Dialog.Title
+                  as="h3"
+                  className="text-lg font-medium leading-6 text-blue-500"
+                >
+                  Feedback
+                </Dialog.Title>
+                <div className="my-2">
+                  <p className="text-sm text-gray-500">
+                    Share your rent experience
+                  </p>
+                </div>
+                <div className="mb-2 flex w-full">
+                  <div>Rating</div>
+                </div>
+                <div className={classes.root}>
+                  <Rating
+                    name="hover-feedback"
+                    value={rating}
+                    precision={1}
+                    onChange={(event, newValue) => {
+                      setRating(newValue);
+                    }}
+                    onChangeActive={(event, newHover) => {
+                      setHover(newHover);
+                    }}
+                  />
+                  {rating !== null && <Box ml={2}>{labels[hover !== -1 ? hover : rating]}</Box>}
+                </div>
+                <div className="mt-4 mb-2 flex">
+                  <div>Review</div>
+                </div>
+                <textarea placeholder="Rentcar.id is awesome" maxLength={450} rows={5} onChange={writeReview}
+                  className="bg-blue-100 hover:bg-red-200 focus:bg-red-200 block w-full border-none rounded-xl shadow-lg focus:ring-0"
+                />
+                <button onClick={sendReview}
+                  className="inline-flex mt-4 mr-2 justify-center px-4 py-2 text-sm font-medium text-blue-900 bg-blue-100 border border-transparent rounded-md hover:bg-blue-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500"
+                >
+                  Send Review
+                </button>
+              </div>
+            </Transition.Child>
+          </div>
+        </Dialog>
+      </Transition>
     </div>
   )
 }
