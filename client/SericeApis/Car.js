@@ -9,6 +9,16 @@ const getCar = async(id) => {
     }
 }
 
+const setComment = async(uid, carnum, comment) => {
+    try {
+        let response = await axios.post(`/api/comment/${uid}/${carnum}`, comment)
+        return await response
+    } catch (error) {
+        return await error.response
+    } 
+}
+
 export default {
     getCar,
+    setComment
 }

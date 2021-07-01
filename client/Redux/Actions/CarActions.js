@@ -12,6 +12,9 @@ import {
     CREATE_CAR_FAIL,
     CREATE_CAR_REQUEST,
     CREATE_CAR_SUCCESS,
+    CREATE_COMMENT_FAIL,
+    CREATE_COMMENT_REQUEST,
+    CREATE_COMMENT_SUCCESS,
     DELETE_CAR_FAIL,
     DELETE_CAR_REQUEST,
     DELETE_CAR_SUCCESS,
@@ -95,6 +98,21 @@ export const deleteCarActions = (cid) => async (dispatch) => {
         return { data }
     } catch (error) {
         dispatch({ type: DELETE_CAR_FAIL, payload: error.response })
+        return { data: error.response }
+    }
+}
+
+export const createCommentActions = (uid, carnum, comment) => async (dispatch) => {
+    console.log('create')
+    dispatch({
+        type: CREATE_COMMENT_REQUEST
+    })
+    try {
+        const data = await axios.post(`/api/comment/${uid}/${carnum}`, comment)
+        //dispatch({ type: CREATE_COMMENT_SUCCESS })
+        return { data }
+    } catch (error) {
+        //dispatch({ type: CREATE_COMMENT_FAIL })
         return { data: error.response }
     }
 }

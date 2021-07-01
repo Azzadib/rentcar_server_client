@@ -127,6 +127,7 @@ export default function LiteCards(props) {
             selected={endDate}
             onChange={(date) => setEnd(date)}
             minDate={startDate}
+            highlightDates={[startDate]}
             maxDate={addDays(startDate, 13)}
             showDisabledMonthNavigation
           />

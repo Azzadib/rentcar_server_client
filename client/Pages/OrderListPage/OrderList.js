@@ -305,7 +305,7 @@ export default function OrderList() {
                                 <button onClick={() => updateOrder(list, 'closed')}
                                   className="my-auto ml-10 border-2 border-blue-500 bg-blue-500 px-6 py-2 rounded-full font-bold text-white shadow-lg focus:outline-none active:transform active:translate-y-1"
                                 >
-                                  Start
+                                  Finish
                                 </button>
                               </div>
                             ))
@@ -357,8 +357,12 @@ export default function OrderList() {
                                   </div>
                                   <div className="font-bold text-lg">Total Payment <span className="text-red-500">Rp{list.order_total_due.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.')}</span></div>
                                 </div>
-                                <button onClick={() => setFeedback(true)}
+                                <button
                                   className="my-auto ml-10 border-2 border-green-500 bg-green-500 px-6 py-2 rounded-full font-bold text-white shadow-lg focus:outline-none active:transform active:translate-y-1"
+                                  onClick={() => history.push({
+                                    pathname: '/feedback',
+                                    data: { order: list }
+                                  })}
                                 >
                                   Feedback
                                 </button>

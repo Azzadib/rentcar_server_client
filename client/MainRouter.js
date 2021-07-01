@@ -6,6 +6,7 @@ import AdminRoute from './auth/AdminRoute'
 import PrivateRoute from './auth/PrivateRoute'
 import CarByTypePage from './Pages/CarByType/CarByTypePage'
 import DetailPage from './Pages/DetailPage/DetailPage'
+import FeedbackPage from './Pages/FeedbackPage/FeedbackPage'
 import GaragePage from './Pages/GaragePage/GaragePage'
 import InvoicePage from './Pages/InvoicePage/InvoicePage'
 import LandingPage from './Pages/LandingPage/LandingPage'
@@ -24,6 +25,7 @@ const MainRouter = () => {
         <Route path="/view/:type" exact component={CarByTypePage}/>
         <Route path="/detail/:id" exact component={DetailPage}/>
         <PrivateRoute path="/profile" exact component={ProfilePage}/>
+        <PrivateRoute path="/feedback" exact component={FeedbackPage}/>
         <PrivateRoute path="/garage" exact component={GaragePage}/>
         <PrivateRoute path="/myorder" exact component={OrderListPage}/>
         <PrivateRoute path="/order/result" exact component={InvoicePage}/>

@@ -55,7 +55,7 @@ export default function Invoice() {
               <div>{user ? user.user_email : 'User Email'}</div>
               <div>{order ? order.order_address : 'Full address'}</div>
               <div>{order ? order.order_city : 'City'}</div>
-              {/* <div>{orderdata ? orderdata.order_phone : ''}</div> */}
+              <div>{order ? order.order_phone : ''}</div>
             </div>
             <div>
               <div className="flex">
