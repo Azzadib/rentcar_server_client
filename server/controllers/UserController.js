@@ -14,8 +14,8 @@ const photoDir = process.cwd() + '/images'
 let transporter = nodemailer.createTransport({
     service: 'hotmail',
     auth: {
-      user: 'adib.badjerei@outlook.com',
-      pass: 'Ingat219'
+      user: 'myemail@email.com',
+      pass: 'Mypassword'
     }
 })
 
